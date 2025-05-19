@@ -11,6 +11,8 @@ use sdl3::{
     video::Window,
 };
 
+mod networking;
+
 const TITLE: &str = "netcode";
 const LOGICAL_WIDTH: u32 = 160;
 const LOGICAL_HEIGHT: u32 = 120;
