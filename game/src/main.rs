@@ -4,6 +4,7 @@ use std::{
 };
 
 use sdl3::{
+    keyboard::Keycode,
     pixels::Color,
     rect::{Point, Rect},
     render::{BlendMode, Canvas, FRect},
@@ -14,9 +15,21 @@ const TITLE: &str = "netcode";
 const LOGICAL_WIDTH: u32 = 160;
 const LOGICAL_HEIGHT: u32 = 120;
 const SCALE: u32 = 8;
-const FRAME_TIME: Duration = Duration::from_nanos(166_666_666);
+const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 
 fn main() {
+    let mut state = Game {
+        players: vec![Player {
+            pos: Vec2 {
+                x: (LOGICAL_WIDTH / 2) as _,
+                y: (LOGICAL_HEIGHT / 2) as _,
+            },
+            color: Color::RED,
+            size: 10.0,
+        }],
+        platforms: Vec::new(),
+    };
+
     let sdl = sdl3::init().unwrap();
 
     let video = sdl.video().unwrap();
@@ -37,33 +50,50 @@ fn main() {
         .unwrap();
     canvas.set_blend_mode(BlendMode::None);
 
+    let mut movement = Vec2 { x: 0.00, y: 0.00 };
+
     'game: loop {
         let start = Instant::now();
 
-        canvas.set_draw_color(Color::BLACK);
-        canvas.clear();
-
-        event_pump.pump_events();
         for event in event_pump.poll_iter() {
             use sdl3::event::Event as Ev;
 
             match event {
                 Ev::Quit { .. } => break 'game,
-                Ev::KeyDown { .. } => {}
-                Ev::MouseButtonDown { x, y, .. } => {
-                    canvas.set_draw_color(Color::WHITE);
-                    canvas
-                        .fill_rect(Rect::from_center(
-                            Point::new((x as u32 / SCALE) as _, (y as u32 / SCALE) as _),
-                            20,
-                            20,
-                        ))
-                        .unwrap();
-                }
+                Ev::KeyDown {
+                    keycode,
+                    repeat: false,
+                    ..
+                } => match keycode {
+                    Some(kc) => match kc {
+                        Keycode::A => movement.x -= 1.00,
+                        Keycode::D => movement.x += 1.00,
+                        Keycode::W => movement.y -= 1.00,
+                        Keycode::S => movement.y += 1.00,
+                        _ => (),
+                    },
+                    None => {}
+                },
+                Ev::KeyUp {
+                    keycode,
+                    repeat: false,
+                    ..
+                } => match keycode {
+                    Some(kc) => match kc {
+                        Keycode::A => movement.x += 1.00,
+                        Keycode::D => movement.x -= 1.00,
+                        Keycode::W => movement.y += 1.00,
+                        Keycode::S => movement.y -= 1.00,
+                        _ => (),
+                    },
+                    None => {}
+                },
                 _ => {}
             }
         }
 
+        send(movement);
+        render(&state, &mut canvas);
         canvas.present();
 
         let elapsed = start.elapsed();
@@ -88,13 +118,17 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
 
     for player in &game.players {
         canvas.set_draw_color(player.color);
-        let _ = canvas.draw_rect(FRect::new(
-            player.pos.x,
-            player.pos.y,
-            player.size,
-            player.size,
-        ));
+        let r = Rect::from_center(
+            Point::new(player.pos.x as _, player.pos.y as _),
+            player.size as _,
+            player.size as _,
+        );
+        let _ = canvas.fill_rect(r);
     }
+}
+
+fn send(moved: Vec2) {
+    println!("sendt movement: {:?}", moved);
 }
 
 struct Game {
@@ -123,7 +157,7 @@ struct Player {
     color: Color,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct Vec2 {
     x: f32,
     y: f32,
