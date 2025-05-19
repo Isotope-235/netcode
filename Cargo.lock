@@ -52,7 +52,3 @@ name = "sdl3-sys"
 version = "0.5.1+SDL3-3.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9be4ae099823870a9c9de3f72ec181d602d8d0550c8f5b2dfdfa9bbaa8ddccd2"
-
-[[package]]
-name = "server"
-version = "0.1.0"
