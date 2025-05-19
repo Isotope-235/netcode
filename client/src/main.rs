@@ -17,7 +17,7 @@ fn main() {
     
     let window = video.window(TITLE, LOGICAL_WIDTH * SCALE, LOGICAL_HEIGHT * SCALE).build().unwrap();
     let mut canvas = window.into_canvas();
-    canvas.set_logical_size(160, 120, sdl3::sys::render::SDL_RendererLogicalPresentation::INTEGER_SCALE).unwrap();
+    canvas.set_logical_size(LOGICAL_WIDTH, LOGICAL_HEIGHT, sdl3::sys::render::SDL_RendererLogicalPresentation::INTEGER_SCALE).unwrap();
     canvas.set_blend_mode(BlendMode::None);
     
     'game: loop {
