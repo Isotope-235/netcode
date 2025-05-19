@@ -128,7 +128,7 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
 }
 
 fn send(moved: Vec2) {
-    println!("sendt movement: {:?}", moved);
+    println!("sent movement: {:?}", moved);
 }
 
 struct Game {
