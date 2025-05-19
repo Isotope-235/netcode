@@ -6,13 +6,8 @@ use std::{
 use sdl3::{
     pixels::Color,
     rect::{Point, Rect},
-    render::{
-        BlendMode,
-        Canvas,
-        FRect
-    },
+    render::{BlendMode, Canvas, FRect},
     video::Window,
-    
 };
 
 const TITLE: &str = "netcode";
@@ -80,15 +75,25 @@ fn main() {
 fn render(game: &Game, canvas: &mut Canvas<Window>) {
     canvas.set_draw_color(Color::WHITE);
     canvas.clear();
-    
+
     canvas.set_draw_color(Color::BLACK);
     for platform in &game.platforms {
-        let _ = canvas.draw_rect(FRect::new(platform.pos.x, platform.pos.y, platform.size.0, platform.size.1));
+        let _ = canvas.draw_rect(FRect::new(
+            platform.pos.x,
+            platform.pos.y,
+            platform.size.0,
+            platform.size.1,
+        ));
     }
-    
+
     for player in &game.players {
         canvas.set_draw_color(player.color);
-        let _ = canvas.draw_rect(FRect::new(player.pos.x, player.pos.y, player.size, player.size));
+        let _ = canvas.draw_rect(FRect::new(
+            player.pos.x,
+            player.pos.y,
+            player.size,
+            player.size,
+        ));
     }
 }
 
@@ -100,29 +105,32 @@ struct Game {
 #[derive(Clone, Copy)]
 struct Platform {
     size: (f32, f32),
-    pos: Vec2
+    pos: Vec2,
 }
 
 impl Platform {
     fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
-        Platform { size: (width, height), pos: Vec2::new(x, y)}
+        Platform {
+            size: (width, height),
+            pos: Vec2::new(x, y),
+        }
     }
 }
 
 struct Player {
     pos: Vec2,
     size: f32,
-    color: Color
+    color: Color,
 }
 
 #[derive(Clone, Copy)]
 struct Vec2 {
     x: f32,
-    y: f32
+    y: f32,
 }
 
 impl Vec2 {
     fn new(x: f32, y: f32) -> Self {
-        Vec2 {x, y}
+        Vec2 { x, y }
     }
 }
