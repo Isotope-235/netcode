@@ -29,10 +29,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     dbg!(&mode);
 
     let sdl = sys::init_sdl()?;
+    let shared_state = Game::new();
 
     match &mode[..] {
-        "server" | "--server" => server::run(sdl),
-        "client" | "--client" | _ => client::run(sdl),
+        "server" | "--server" => server::run(sdl, shared_state),
+        "client" | "--client" | _ => client::run(sdl, shared_state),
     }
 }
 

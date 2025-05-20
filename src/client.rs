@@ -12,10 +12,10 @@ const JUMP_VELOCITY: f32 = 20.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
-pub fn run(mut sdl: sys::SdlContext) -> Result<(), Box<dyn Error>> {
+pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
         player_idx: 0,
-        shared: Game::new(),
+        shared,
     };
 
     let mut sdl = sys::init_sdl()?;
