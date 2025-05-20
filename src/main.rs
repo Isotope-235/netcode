@@ -17,10 +17,6 @@ mod networking;
 mod server;
 mod sys;
 
-const HOST: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
-const PORT: u16 = 56665;
-const SERVER_HOST: Ipv4Addr = HOST;
-const SERVER_PORT: u16 = 7878;
 const LOGICAL_WIDTH: u32 = 160;
 const LOGICAL_HEIGHT: u32 = 120;
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);

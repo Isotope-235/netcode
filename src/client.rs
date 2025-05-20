@@ -2,10 +2,10 @@ use std::{error::Error, thread, time::Instant};
 
 use sdl3::{keyboard::Keycode, pixels::Color};
 
-use crate::{
-    Command, FRAME_TIME, Game, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
-    SERVER_PORT, Vec2, render, send, sys,
-};
+use crate::{Command, FRAME_TIME, Game, Vec2, render, send, server, sys};
+
+const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
+const PORT: u16 = 0;
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let mut state = State {
@@ -17,7 +17,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let mut movement = (0, 0);
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
-    client.connect((SERVER_HOST, SERVER_PORT))?;
+    client.connect((server::HOST, server::PORT))?;
     client.set_nonblocking(true)?;
 
     'game: loop {
