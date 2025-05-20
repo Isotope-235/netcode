@@ -26,7 +26,14 @@ const LOGICAL_HEIGHT: u32 = 120;
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 
 fn main() -> Result<(), Box<dyn Error>> {
-    client::run()
+    let mut args = std::env::args();
+
+    let mode = args.nth(1).unwrap();
+
+    match &mode[..] {
+        "server" => server::run(),
+        "client" | _ => client::run(),
+    }
 }
 
 fn render(game: &Game, canvas: &mut Canvas<Window>) {
@@ -63,7 +70,7 @@ struct Command {
 fn send(socket: &UdpSocket, moved: Command) {
     println!("sent movement: {:?}", &moved);
     let payload: [u8; 2] = unsafe { std::mem::transmute(moved) };
-    socket.send(&payload).unwrap();
+    let _ = socket.send(&payload);
 }
 
 struct Game {

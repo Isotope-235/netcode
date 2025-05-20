@@ -18,6 +18,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let mut movement = (0, 0);
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((SERVER_HOST, SERVER_PORT))?;
+    client.set_nonblocking(true)?;
 
     'game: loop {
         let start = Instant::now();
@@ -51,6 +52,11 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 },
                 _ => (),
             }
+        }
+
+        let mut buf = [0; 64];
+        if let Ok(read) = client.recv(&mut buf) {
+            println!("got data: {:?}", &buf[..read]);
         }
 
         send(
