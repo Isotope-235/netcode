@@ -1,6 +1,5 @@
 use std::{
-    thread,
-    time::{Duration, Instant},
+    error::Error, net::Ipv4Addr, thread, time::{Duration, Instant}
 };
 
 use sdl3::{
@@ -13,13 +12,17 @@ use sdl3::{
 
 mod networking;
 
+const HOST: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
+const PORT: u16 = 56665;
+const SERVER_HOST: Ipv4Addr = HOST;
+const SERVER_PORT: u16 = 7878;
 const TITLE: &str = "netcode";
 const LOGICAL_WIDTH: u32 = 160;
 const LOGICAL_HEIGHT: u32 = 120;
 const SCALE: u32 = 8;
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let mut state = Game {
         players: vec![Player {
             pos: Vec2 {
@@ -32,27 +35,27 @@ fn main() {
         platforms: Vec::new(),
     };
 
-    let sdl = sdl3::init().unwrap();
+    let sdl = sdl3::init()?;
 
-    let video = sdl.video().unwrap();
+    let video = sdl.video()?;
 
-    let mut event_pump = sdl.event_pump().unwrap();
+    let mut event_pump = sdl.event_pump()?;
 
     let window = video
         .window(TITLE, LOGICAL_WIDTH * SCALE, LOGICAL_HEIGHT * SCALE)
-        .build()
-        .unwrap();
+        .build()?;
     let mut canvas = window.into_canvas();
     canvas
         .set_logical_size(
             LOGICAL_WIDTH,
             LOGICAL_HEIGHT,
             sdl3::sys::render::SDL_RendererLogicalPresentation::INTEGER_SCALE,
-        )
-        .unwrap();
+        )?;
     canvas.set_blend_mode(BlendMode::None);
 
     let mut movement = Vec2 { x: 0.00, y: 0.00 };
+    let client = std::net::UdpSocket::bind((HOST, PORT))?;
+    client.connect((SERVER_HOST, SERVER_PORT));
 
     'game: loop {
         let start = Instant::now();
@@ -102,6 +105,8 @@ fn main() {
         let wait = FRAME_TIME.checked_sub(elapsed);
         thread::sleep(wait.unwrap_or_default());
     }
+    
+    Ok(())
 }
 
 fn render(game: &Game, canvas: &mut Canvas<Window>) {
