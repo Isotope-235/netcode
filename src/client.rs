@@ -2,14 +2,10 @@ use std::{error::Error, thread, time::Instant};
 
 use sdl3::{keyboard::Keycode, pixels::Color};
 
-use crate::{Command, FRAME_TIME, Game, Vec2, render, send, server, sys};
+use crate::{Command, FRAME_TIME, Game, Player, Platform, Vec2, render, send, server, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
-use crate::{
-    Command, FRAME_TIME, Game, Platform, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
-    SERVER_PORT, Vec2, render, send, sys,
-};
 
 const PLAYER_SPEED: f32 = 35.;
 const JUMP_VELOCITY: f32 = 20.;
@@ -107,11 +103,39 @@ fn player_movement(game: &mut State) {
 }
 
 fn collide(player: &mut Player, platforms: &Vec<Platform>) {
-    for platform in platforms {
-        if platform.pos.x + platform.size.0 + (player.size / 2.)
+    let mut collided = true;
+    while !collided {
+        collided = false;
+        for platform in platforms {
+            if platform.pos.x + platform.size.0 + (player.size / 2.) > player.pos.x &&
+                platform.pos.x - platform.size.0 - (player.size / 2.) < player.pos.x &&
+                platform.pos.y + platform.size.1 + (player.size / 2.) > player.pos.y &&
+                platform.pos.y - platform.size.1 - (player.size / 2.) < player.pos.y
+            {
+                collided = true;
+                fix_position(player, platform);
+            }
+        }
     }
 }
 
 fn fix_position(player: &mut Player, platform: &Platform) {
     let player_relative_posistion = platform.pos - player.pos;
+    
+    // These corrected positions are the possible positions to push the 
+    // player out of the platform they are currently colliding with
+    let x_direction = if player_relative_posistion.x < 0. { -1. } else { 1. };
+    let x_corrected = Vec2::new(
+        platform.pos.x + x_direction * (platform.size.0 + (player.size / 2.)), 
+        platform.pos.y + player_relative_posistion.y
+    );
+    
+    let y_direction = if player_relative_posistion.y < 0. { -1. } else { 1. };
+    let y_corrected = Vec2::new(
+        platform.pos.x + player_relative_posistion.x,
+        platform.pos.y + x_direction * (platform.size.0 + (player.size / 2.)), 
+    );   
+    
+    // Check which position is closest to the players actual location and use that one
+    
 }
