@@ -1,5 +1,6 @@
 use std::{
-    error::Error, net::{Ipv4Addr, UdpSocket}, thread, time::{Duration, Instant}
+    error::Error, net::{Ipv4Addr, UdpSocket}, thread, time::{Duration, Instant},
+    ops::{Add, AddAssign, Mul} 
 };
 
 use sdl3::{
@@ -24,12 +25,14 @@ const SCALE: u32 = 8;
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let state = Game {
+    let mut state = Game {
+        player_idx: Some(0),
         players: vec![Player {
             pos: Vec2 {
                 x: (LOGICAL_WIDTH / 2) as _,
                 y: (LOGICAL_HEIGHT / 2) as _,
             },
+            velocity: Vec2::new(0., 0.),
             color: Color::RED,
             size: 10.0,
         }],
@@ -93,6 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         send(&client, Command { x: movement.0, y: movement.1 });
+        player_movement(&mut state, movement);
         render(&state, &mut canvas);
         canvas.present();
 
@@ -141,7 +145,23 @@ fn send(socket: &UdpSocket, moved: Command) {
     socket.send(&payload).unwrap();
 }
 
+fn player_movement(game: &mut Game, movement: (i8, i8)) {
+    const PLAYER_SPEED: f32 = 10.;
+    const JUMP_VELOCITY: f32 = 20.;
+    const GRAVITY: f32 = 9.81;
+    
+    if let Some(idx) = game.player_idx {
+        game.players[idx].velocity = Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
+    }
+    
+    for player in &mut game.players {
+        player.pos += player.velocity;
+    }
+}
+
+
 struct Game {
+    player_idx: Option<usize>,
     platforms: Vec<Platform>,
     players: Vec<Player>,
 }
@@ -163,6 +183,7 @@ impl Platform {
 
 struct Player {
     pos: Vec2,
+    velocity: Vec2,
     size: f32,
     color: Color,
 }
@@ -173,8 +194,40 @@ struct Vec2 {
     y: f32,
 }
 
+impl Add for Vec2 {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Vec2 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y
+        }
+    }
+}
+
+impl AddAssign for Vec2 {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x = self.x + rhs.x;
+        self.y = self.y + rhs.y;
+    }
+}
+
+impl Mul<f32> for Vec2 {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vec2::new(self.x*rhs, self.y*rhs)
+    }
+}
+
 impl Vec2 {
     fn new(x: f32, y: f32) -> Self {
         Vec2 { x, y }
+    }
+    
+    fn normalize(self) -> Self {
+        self * (1./self.len())
+    }
+    
+    fn len(self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
 }
