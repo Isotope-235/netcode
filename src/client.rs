@@ -1,17 +1,13 @@
-use std::{error::Error, thread, time::Instant};
+use std::error::Error;
 
-use sdl3::{
-    keyboard::{KeyboardState, Keycode},
-    pixels::Color,
-};
+use sdl3::keyboard::KeyboardState;
 
-use crate::{Command, FRAME_TIME, Game, Platform, Player, Vec2, render, send, server, sys};
+use crate::{FRAME_TIME, Game, Platform, Player, Vec2, render, send, server, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
 
 const PLAYER_SPEED: f32 = 35.;
-const JUMP_VELOCITY: f32 = 20.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
@@ -21,7 +17,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         shared,
     };
 
-    let mut movement = (0, 0);
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((server::HOST, server::PORT))?;
     client.set_nonblocking(true)?;
@@ -34,20 +29,14 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         running = sdl.should_run();
 
-        movement = get_input(sdl.events.keyboard_state());
+        let movement = get_input(sdl.events.keyboard_state());
 
         let mut buf = [0; 64];
         if let Ok(read) = client.recv(&mut buf) {
             println!("got data: {:?}", &buf[..read]);
         }
 
-        send(
-            &client,
-            Command {
-                x: movement.0,
-                y: movement.1,
-            },
-        );
+        send(&client);
 
         player_input(&mut state.shared, state.player_idx, movement);
         player_movement(&mut state);

@@ -1,6 +1,4 @@
-use std::{collections::HashMap, error::Error, io, net::UdpSocket, thread, time::Instant};
-
-use sdl3::{keyboard::Keycode, pixels::Color};
+use std::{error::Error, io, net::UdpSocket};
 
 use crate::{FRAME_TIME, Game, render, sys};
 
@@ -46,6 +44,7 @@ struct State {
     shared: crate::Game,
 }
 
+#[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     for addr in &state.clients {
         socket.send_to(&[69], addr)?;

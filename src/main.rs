@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    net::{Ipv4Addr, UdpSocket},
+    net::UdpSocket,
     ops::{Add, AddAssign, Mul, Sub},
     time::Duration,
 };
@@ -8,7 +8,7 @@ use std::{
 use sdl3::{
     pixels::Color,
     rect::{Point, Rect},
-    render::{Canvas, FRect},
+    render::Canvas,
     video::Window,
 };
 
@@ -64,16 +64,8 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
     canvas.present();
 }
 
-#[derive(Debug)]
-struct Command {
-    x: i8,
-    y: i8,
-}
-
-fn send(socket: &UdpSocket, moved: Command) {
-    // println!("sent movement: {:?}", &moved);
-    let payload: [u8; 2] = unsafe { std::mem::transmute(moved) };
-    let _ = socket.send(&payload);
+fn send(socket: &UdpSocket) {
+    let _ = socket.send(&[69, 69]);
 }
 
 struct Game {
@@ -105,15 +97,6 @@ impl Game {
 struct Platform {
     size: (f32, f32),
     pos: Vec2,
-}
-
-impl Platform {
-    fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
-        Platform {
-            size: (width, height),
-            pos: Vec2::new(x, y),
-        }
-    }
 }
 
 struct Player {
