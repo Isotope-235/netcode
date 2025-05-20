@@ -40,7 +40,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         }
 
         render(&state.shared, &mut sdl.canvas);
-        sdl.canvas.present();
 
         tick.wait();
     }

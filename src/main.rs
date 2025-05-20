@@ -60,6 +60,8 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
         );
         let _ = canvas.fill_rect(r);
     }
+
+    canvas.present();
 }
 
 #[derive(Debug)]

@@ -77,7 +77,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         player_input(&mut state.shared, state.player_idx, movement);
         player_movement(&mut state);
         render(&state.shared, &mut sdl.canvas);
-        sdl.canvas.present();
 
         tick.wait();
     }
