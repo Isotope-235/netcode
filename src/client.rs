@@ -90,20 +90,20 @@ fn player_movement(game: &mut State) {
     for player in &mut game.shared.players {
         player.velocity += GRAVITY * DELTA_TIME;
         player.pos += player.velocity;
-
-        dbg!(player.pos);
+        
+        collide(player, &game.shared.platforms);
     }
 }
 
 fn collide(player: &mut Player, platforms: &Vec<Platform>) {
     let mut collided = true;
-    while !collided {
+    while collided {
         collided = false;
         for platform in platforms {
-            if platform.pos.x + platform.size.0 + (player.size / 2.) > player.pos.x
-                && platform.pos.x - platform.size.0 - (player.size / 2.) < player.pos.x
-                && platform.pos.y + platform.size.1 + (player.size / 2.) > player.pos.y
-                && platform.pos.y - platform.size.1 - (player.size / 2.) < player.pos.y
+            if platform.pos.x + platform.size.0 / 2. > player.pos.x - (player.size / 2.)  &&
+                platform.pos.x - platform.size.0 / 2. < player.pos.x + (player.size / 2.)  &&
+                platform.pos.y + platform.size.1 / 2. > player.pos.y - (player.size / 2.)  &&
+                platform.pos.y - platform.size.1 / 2. < player.pos.y + (player.size / 2.) 
             {
                 collided = true;
                 fix_position(player, platform);
@@ -113,9 +113,9 @@ fn collide(player: &mut Player, platforms: &Vec<Platform>) {
 }
 
 fn fix_position(player: &mut Player, platform: &Platform) {
-    let player_relative_posistion = platform.pos - player.pos;
-
-    // These corrected positions are the possible positions to push the
+    let player_relative_posistion = player.pos - platform.pos;
+    
+    // These corrected positions are the possible positions to push the 
     // player out of the platform they are currently colliding with
     let x_direction = if player_relative_posistion.x < 0. {
         -1.
@@ -123,8 +123,8 @@ fn fix_position(player: &mut Player, platform: &Platform) {
         1.
     };
     let x_corrected = Vec2::new(
-        platform.pos.x + x_direction * (platform.size.0 + (player.size / 2.)),
-        platform.pos.y + player_relative_posistion.y,
+        platform.pos.x + x_direction * (platform.size.0 / 2. + (player.size / 2.)), 
+        platform.pos.y + player_relative_posistion.y
     );
 
     let y_direction = if player_relative_posistion.y < 0. {
@@ -134,8 +134,13 @@ fn fix_position(player: &mut Player, platform: &Platform) {
     };
     let y_corrected = Vec2::new(
         platform.pos.x + player_relative_posistion.x,
-        platform.pos.y + x_direction * (platform.size.0 + (player.size / 2.)),
-    );
-
+        platform.pos.y + y_direction * (platform.size.1 / 2. + (player.size / 2.)), 
+    );   
+    
     // Check which position is closest to the players actual location and use that one
+    player.pos = if (player.pos - y_corrected).len() < (player.pos - x_corrected).len() {
+        y_corrected
+    } else {
+        x_corrected
+    };
 }

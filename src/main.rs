@@ -71,7 +71,7 @@ struct Command {
 }
 
 fn send(socket: &UdpSocket, moved: Command) {
-    println!("sent movement: {:?}", &moved);
+    // println!("sent movement: {:?}", &moved);
     let payload: [u8; 2] = unsafe { std::mem::transmute(moved) };
     let _ = socket.send(&payload);
 }
