@@ -1,4 +1,4 @@
-use std::{error::Error, io, net::UdpSocket, thread, time::Instant};
+use std::{collections::HashMap, error::Error, io, net::UdpSocket, thread, time::Instant};
 
 use sdl3::{keyboard::Keycode, pixels::Color};
 
@@ -15,8 +15,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let mut sdl = sys::init_sdl()?;
 
-    let mut movement = (0, 0);
     let server = std::net::UdpSocket::bind((HOST, PORT))?;
+    server.set_nonblocking(true)?;
 
     'game: loop {
         let start = Instant::now();
@@ -28,6 +28,15 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 Ev::Quit { .. } => break 'game,
                 _ => (),
             }
+        }
+
+        let mut buf = [0; 64];
+        while let Ok((read, origin)) = server.recv_from(&mut buf) {
+            if !state.clients.contains(&origin) {
+                state.clients.push(origin);
+            }
+
+            println!("server got data: {:?}", &buf[..read]);
         }
 
         render(&state.shared, &mut sdl.canvas);

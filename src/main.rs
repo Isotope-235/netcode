@@ -26,9 +26,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mode = args.nth(1).unwrap();
 
+    dbg!(&mode);
+
     match &mode[..] {
-        "server" => server::run(),
-        "client" | _ => client::run(),
+        "server" | "--server" => server::run(),
+        "client" | "--client" | _ => client::run(),
     }
 }
 
