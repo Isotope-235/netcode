@@ -88,15 +88,10 @@ impl Game {
                 color: Color::RED,
                 size: 10.0,
             }],
-            platforms: vec![
-                Platform {
-                    size: (60., 20.),
-                    pos: Vec2::new(
-                        (LOGICAL_WIDTH / 2) as _,
-                        (LOGICAL_HEIGHT / 2 + 30) as _,
-                    )
-                }
-            ],
+            platforms: vec![Platform {
+                size: (60., 20.),
+                pos: Vec2::new((LOGICAL_WIDTH / 2) as _, (LOGICAL_HEIGHT / 2 + 30) as _),
+            }],
         }
     }
 }

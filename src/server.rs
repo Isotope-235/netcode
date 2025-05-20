@@ -18,8 +18,10 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let server = std::net::UdpSocket::bind((HOST, PORT))?;
     server.set_nonblocking(true)?;
 
+    let ticker = sys::ticker(FRAME_TIME);
+
     'game: loop {
-        let start = Instant::now();
+        let tick = ticker.start();
 
         for event in sdl.events.poll_iter() {
             use sdl3::event::Event as Ev;
@@ -42,7 +44,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         render(&state.shared, &mut sdl.canvas);
         sdl.canvas.present();
 
-        sys::tick(start, FRAME_TIME)
+        tick.wait();
     }
 
     Ok(())

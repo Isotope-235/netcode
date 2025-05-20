@@ -38,8 +38,33 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
     })
 }
 
-pub fn tick(start: Instant, frame_time: Duration) {
-    let elapsed = start.elapsed();
-    let wait = frame_time.checked_sub(elapsed);
-    std::thread::sleep(wait.unwrap_or_default());
+#[derive(Clone, Copy)]
+pub struct Ticker {
+    frame_time: Duration,
+}
+
+pub fn ticker(frame_time: Duration) -> Ticker {
+    Ticker { frame_time }
+}
+
+impl Ticker {
+    pub fn start(self) -> Tick {
+        Tick {
+            frame_time: self.frame_time,
+            start: Instant::now(),
+        }
+    }
+}
+
+pub struct Tick {
+    frame_time: Duration,
+    start: Instant,
+}
+
+impl Tick {
+    pub fn wait(self) {
+        let elapsed = self.start.elapsed();
+        let wait = self.frame_time.checked_sub(elapsed);
+        std::thread::sleep(wait.unwrap_or_default());
+    }
 }
