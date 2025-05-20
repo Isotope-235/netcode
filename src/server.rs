@@ -7,13 +7,11 @@ use crate::{FRAME_TIME, Game, render, sys};
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run(mut sdl: sys::SdlContext) -> Result<(), Box<dyn Error>> {
     let mut state = State {
         clients: Vec::new(),
         shared: Game::new(),
     };
-
-    let mut sdl = sys::init_sdl()?;
 
     let server = std::net::UdpSocket::bind((HOST, PORT))?;
     server.set_nonblocking(true)?;

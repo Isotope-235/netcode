@@ -28,9 +28,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     dbg!(&mode);
 
+    let sdl = sys::init_sdl()?;
+
     match &mode[..] {
-        "server" | "--server" => server::run(),
-        "client" | "--client" | _ => client::run(),
+        "server" | "--server" => server::run(sdl),
+        "client" | "--client" | _ => client::run(sdl),
     }
 }
 
