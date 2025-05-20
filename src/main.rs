@@ -1,6 +1,8 @@
 use std::{
-    error::Error, net::{Ipv4Addr, UdpSocket}, time::Duration,
-    ops::{Add, AddAssign, Mul} 
+    error::Error,
+    net::{Ipv4Addr, UdpSocket},
+    ops::{Add, AddAssign, Mul},
+    time::Duration,
 };
 
 use sdl3::{
@@ -11,9 +13,9 @@ use sdl3::{
 };
 
 mod client;
-mod sys;
-mod server;
 mod networking;
+mod server;
+mod sys;
 
 const HOST: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 56665;
@@ -55,7 +57,7 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
 #[derive(Debug)]
 struct Command {
     x: i8,
-    y: i8
+    y: i8,
 }
 
 fn send(socket: &UdpSocket, moved: Command) {
@@ -68,16 +70,16 @@ fn player_movement(game: &mut Game, movement: (i8, i8)) {
     const PLAYER_SPEED: f32 = 10.;
     const JUMP_VELOCITY: f32 = 20.;
     const GRAVITY: f32 = 9.81;
-    
+
     if let Some(idx) = game.player_idx {
-        game.players[idx].velocity = Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
+        game.players[idx].velocity =
+            Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
     }
-    
+
     for player in &mut game.players {
         player.pos += player.velocity;
     }
 }
-
 
 struct Game {
     player_idx: Option<usize>,
@@ -118,7 +120,7 @@ impl Add for Vec2 {
     fn add(self, rhs: Self) -> Self::Output {
         Vec2 {
             x: self.x + rhs.x,
-            y: self.y + rhs.y
+            y: self.y + rhs.y,
         }
     }
 }
@@ -133,7 +135,7 @@ impl AddAssign for Vec2 {
 impl Mul<f32> for Vec2 {
     type Output = Self;
     fn mul(self, rhs: f32) -> Self::Output {
-        Vec2::new(self.x*rhs, self.y*rhs)
+        Vec2::new(self.x * rhs, self.y * rhs)
     }
 }
 
@@ -141,11 +143,11 @@ impl Vec2 {
     fn new(x: f32, y: f32) -> Self {
         Vec2 { x, y }
     }
-    
+
     fn normalize(self) -> Self {
-        self * (1./self.len())
+        self * (1. / self.len())
     }
-    
+
     fn len(self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }

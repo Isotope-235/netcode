@@ -2,7 +2,10 @@ use std::{error::Error, thread, time::Instant};
 
 use sdl3::{keyboard::Keycode, pixels::Color};
 
-use crate::{player_movement, render, send, sys, Command, Game, Player, Vec2, FRAME_TIME, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, SERVER_HOST, SERVER_PORT};
+use crate::{
+    Command, FRAME_TIME, Game, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
+    SERVER_PORT, Vec2, player_movement, render, send, sys,
+};
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let mut state = Game {
@@ -18,7 +21,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         }],
         platforms: Vec::new(),
     };
-    
+
     let mut sdl = sys::init_sdl()?;
 
     let mut movement = (0, 0);
@@ -55,11 +58,17 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                     Keycode::S => movement.1 -= 1,
                     _ => (),
                 },
-                _ => ()
+                _ => (),
             }
         }
 
-        send(&client, Command { x: movement.0, y: movement.1 });
+        send(
+            &client,
+            Command {
+                x: movement.0,
+                y: movement.1,
+            },
+        );
         player_movement(&mut state, movement);
         render(&state, &mut sdl.canvas);
         sdl.canvas.present();
@@ -68,6 +77,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         let wait = FRAME_TIME.checked_sub(elapsed);
         thread::sleep(wait.unwrap_or_default());
     }
-    
+
     Ok(())
 }
