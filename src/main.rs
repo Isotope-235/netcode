@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         )?;
     canvas.set_blend_mode(BlendMode::None);
 
-    let mut movement = Vec2 { x: 0.00, y: 0.00 };
+    let mut movement = (0, 0);
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((SERVER_HOST, SERVER_PORT))?;
 
@@ -70,10 +70,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     repeat: false,
                     ..
                 } => match kc {
-                    Keycode::A => movement.x -= 1.00,
-                    Keycode::D => movement.x += 1.00,
-                    Keycode::W => movement.y -= 1.00,
-                    Keycode::S => movement.y += 1.00,
+                    Keycode::A => movement.0 -= 1,
+                    Keycode::D => movement.0 += 1,
+                    Keycode::W => movement.1 -= 1,
+                    Keycode::S => movement.1 += 1,
                     _ => (),
                 },
                 Ev::KeyUp {
@@ -81,10 +81,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     repeat: false,
                     ..
                 } => match kc {
-                    Keycode::A => movement.x += 1.00,
-                    Keycode::D => movement.x -= 1.00,
-                    Keycode::W => movement.y += 1.00,
-                    Keycode::S => movement.y -= 1.00,
+                    Keycode::A => movement.0 += 1,
+                    Keycode::D => movement.0 -= 1,
+                    Keycode::W => movement.1 += 1,
+                    Keycode::S => movement.1 -= 1,
                     _ => (),
                 },
                 _ => ()
@@ -128,7 +128,7 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
     }
 }
 
-fn send(moved: Vec2) {
+fn send(moved: (i32, i32)) {
     println!("sent movement: {:?}", moved);
 }
 
