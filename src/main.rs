@@ -66,25 +66,26 @@ fn send(socket: &UdpSocket, moved: Command) {
     socket.send(&payload).unwrap();
 }
 
-fn player_movement(game: &mut Game, movement: (i8, i8)) {
-    const PLAYER_SPEED: f32 = 10.;
-    const JUMP_VELOCITY: f32 = 20.;
-    const GRAVITY: f32 = 9.81;
-
-    if let Some(idx) = game.player_idx {
-        game.players[idx].velocity =
-            Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
-    }
-
-    for player in &mut game.players {
-        player.pos += player.velocity;
-    }
-}
-
 struct Game {
-    player_idx: Option<usize>,
     platforms: Vec<Platform>,
     players: Vec<Player>,
+}
+
+impl Game {
+    fn new() -> Self {
+        Self {
+            players: vec![Player {
+                pos: Vec2 {
+                    x: (LOGICAL_WIDTH / 2) as _,
+                    y: (LOGICAL_HEIGHT / 2) as _,
+                },
+                velocity: Vec2::new(0., 0.),
+                color: Color::RED,
+                size: 10.0,
+            }],
+            platforms: Vec::new(),
+        }
+    }
 }
 
 #[derive(Clone, Copy)]

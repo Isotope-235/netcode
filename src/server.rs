@@ -4,23 +4,11 @@ use sdl3::{keyboard::Keycode, pixels::Color};
 
 use crate::{
     Command, FRAME_TIME, Game, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
-    SERVER_PORT, Vec2, player_movement, render, send, sys,
+    SERVER_PORT, Vec2, render, send, sys,
 };
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let mut state = Game {
-        player_idx: Some(0),
-        players: vec![Player {
-            pos: Vec2 {
-                x: (LOGICAL_WIDTH / 2) as _,
-                y: (LOGICAL_HEIGHT / 2) as _,
-            },
-            velocity: Vec2::new(0., 0.),
-            color: Color::RED,
-            size: 10.0,
-        }],
-        platforms: Vec::new(),
-    };
+    let mut state = Game::new();
 
     let mut sdl = sys::init_sdl()?;
 
@@ -36,28 +24,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
             match event {
                 Ev::Quit { .. } => break 'game,
-                Ev::KeyDown {
-                    keycode: Some(kc),
-                    repeat: false,
-                    ..
-                } => match kc {
-                    Keycode::A => movement.0 -= 1,
-                    Keycode::D => movement.0 += 1,
-                    Keycode::W => movement.1 -= 1,
-                    Keycode::S => movement.1 += 1,
-                    _ => (),
-                },
-                Ev::KeyUp {
-                    keycode: Some(kc),
-                    repeat: false,
-                    ..
-                } => match kc {
-                    Keycode::A => movement.0 += 1,
-                    Keycode::D => movement.0 -= 1,
-                    Keycode::W => movement.1 += 1,
-                    Keycode::S => movement.1 -= 1,
-                    _ => (),
-                },
                 _ => (),
             }
         }
@@ -69,7 +35,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 y: movement.1,
             },
         );
-        player_movement(&mut state, movement);
         render(&state, &mut sdl.canvas);
         sdl.canvas.present();
 

@@ -4,22 +4,13 @@ use sdl3::{keyboard::Keycode, pixels::Color};
 
 use crate::{
     Command, FRAME_TIME, Game, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
-    SERVER_PORT, Vec2, player_movement, render, send, sys,
+    SERVER_PORT, Vec2, render, send, sys,
 };
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let mut state = Game {
-        player_idx: Some(0),
-        players: vec![Player {
-            pos: Vec2 {
-                x: (LOGICAL_WIDTH / 2) as _,
-                y: (LOGICAL_HEIGHT / 2) as _,
-            },
-            velocity: Vec2::new(0., 0.),
-            color: Color::RED,
-            size: 10.0,
-        }],
-        platforms: Vec::new(),
+    let mut state = State {
+        player_idx: 0,
+        shared: Game::new(),
     };
 
     let mut sdl = sys::init_sdl()?;
@@ -70,7 +61,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             },
         );
         player_movement(&mut state, movement);
-        render(&state, &mut sdl.canvas);
+        render(&state.shared, &mut sdl.canvas);
         sdl.canvas.present();
 
         let elapsed = start.elapsed();
@@ -79,4 +70,22 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+struct State {
+    player_idx: usize,
+    shared: crate::Game,
+}
+
+fn player_movement(game: &mut State, movement: (i8, i8)) {
+    const PLAYER_SPEED: f32 = 10.;
+    const JUMP_VELOCITY: f32 = 20.;
+    const GRAVITY: f32 = 9.81;
+
+    game.shared.players[game.player_idx].velocity =
+        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
+
+    for player in &mut game.shared.players {
+        player.pos += player.velocity;
+    }
 }
