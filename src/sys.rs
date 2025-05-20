@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use sdl3::render::BlendMode;
 
 const TITLE: &str = "netcode";
@@ -34,4 +36,10 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
         events,
         canvas,
     })
+}
+
+pub fn tick(start: Instant, frame_time: Duration) {
+    let elapsed = start.elapsed();
+    let wait = frame_time.checked_sub(elapsed);
+    std::thread::sleep(wait.unwrap_or_default());
 }

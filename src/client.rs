@@ -64,9 +64,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         render(&state.shared, &mut sdl.canvas);
         sdl.canvas.present();
 
-        let elapsed = start.elapsed();
-        let wait = FRAME_TIME.checked_sub(elapsed);
-        thread::sleep(wait.unwrap_or_default());
+        sys::tick(start, FRAME_TIME);
     }
 
     Ok(())
