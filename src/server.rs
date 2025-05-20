@@ -18,17 +18,11 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
     let ticker = sys::ticker(FRAME_TIME);
 
-    'game: loop {
+    let mut running = true;
+    while running {
         let tick = ticker.start();
 
-        for event in sdl.events.poll_iter() {
-            use sdl3::event::Event as Ev;
-
-            match event {
-                Ev::Quit { .. } => break 'game,
-                _ => (),
-            }
-        }
+        running = sdl.should_run();
 
         let mut buf = [0; 64];
         while let Ok((read, origin)) = server.recv_from(&mut buf) {

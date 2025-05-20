@@ -1,6 +1,9 @@
 use std::{error::Error, thread, time::Instant};
 
-use sdl3::{keyboard::Keycode, pixels::Color};
+use sdl3::{
+    keyboard::{KeyboardState, Keycode},
+    pixels::Color,
+};
 
 use crate::{Command, FRAME_TIME, Game, Platform, Player, Vec2, render, send, server, sys};
 
@@ -25,39 +28,13 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
     let ticker = sys::ticker(FRAME_TIME);
 
-    'game: loop {
+    let mut running = true;
+    while running {
         let tick = ticker.start();
 
-        for event in sdl.events.poll_iter() {
-            use sdl3::event::Event as Ev;
+        running = sdl.should_run();
 
-            match event {
-                Ev::Quit { .. } => break 'game,
-                Ev::KeyDown {
-                    keycode: Some(kc),
-                    repeat: false,
-                    ..
-                } => match kc {
-                    Keycode::A => movement.0 -= 1,
-                    Keycode::D => movement.0 += 1,
-                    Keycode::W => movement.1 -= 1,
-                    Keycode::S => movement.1 += 1,
-                    _ => (),
-                },
-                Ev::KeyUp {
-                    keycode: Some(kc),
-                    repeat: false,
-                    ..
-                } => match kc {
-                    Keycode::A => movement.0 += 1,
-                    Keycode::D => movement.0 -= 1,
-                    Keycode::W => movement.1 += 1,
-                    Keycode::S => movement.1 -= 1,
-                    _ => (),
-                },
-                _ => (),
-            }
-        }
+        movement = get_input(sdl.events.keyboard_state());
 
         let mut buf = [0; 64];
         if let Ok(read) = client.recv(&mut buf) {
@@ -80,6 +57,23 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     }
 
     Ok(())
+}
+
+fn get_input(keyboard: KeyboardState<'_>) -> (i8, i8) {
+    use sdl3::keyboard::Scancode as Sc;
+
+    let (left, right) = (
+        keyboard.is_scancode_pressed(Sc::A),
+        keyboard.is_scancode_pressed(Sc::D),
+    );
+    let (up, down) = (
+        keyboard.is_scancode_pressed(Sc::W),
+        keyboard.is_scancode_pressed(Sc::S),
+    );
+    let x = right as i8 - left as i8;
+    let y = down as i8 - up as i8;
+
+    (x, y)
 }
 
 struct State {

@@ -1,4 +1,7 @@
-use std::time::{Duration, Instant};
+use std::{
+    ops::Not,
+    time::{Duration, Instant},
+};
 
 use sdl3::render::BlendMode;
 
@@ -36,6 +39,15 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
         events,
         canvas,
     })
+}
+
+impl SdlContext {
+    pub fn should_run(&mut self) -> bool {
+        self.events
+            .poll_iter()
+            .any(|e| matches!(e, sdl3::event::Event::Quit { .. }))
+            .not()
+    }
 }
 
 #[derive(Clone, Copy)]
