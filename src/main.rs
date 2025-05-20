@@ -131,8 +131,8 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
 
 #[derive(Debug)]
 struct Command {
-    x: u8,
-    y: u8
+    x: i8,
+    y: i8
 }
 
 fn send(socket: &UdpSocket, moved: Command) {
