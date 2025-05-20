@@ -23,7 +23,7 @@ const SCALE: u32 = 8;
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut state = Game {
+    let state = Game {
         players: vec![Player {
             pos: Vec2 {
                 x: (LOGICAL_WIDTH / 2) as _,
@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut movement = Vec2 { x: 0.00, y: 0.00 };
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
-    client.connect((SERVER_HOST, SERVER_PORT));
+    client.connect((SERVER_HOST, SERVER_PORT))?;
 
     'game: loop {
         let start = Instant::now();
@@ -66,34 +66,28 @@ fn main() -> Result<(), Box<dyn Error>> {
             match event {
                 Ev::Quit { .. } => break 'game,
                 Ev::KeyDown {
-                    keycode,
+                    keycode: Some(kc),
                     repeat: false,
                     ..
-                } => match keycode {
-                    Some(kc) => match kc {
-                        Keycode::A => movement.x -= 1.00,
-                        Keycode::D => movement.x += 1.00,
-                        Keycode::W => movement.y -= 1.00,
-                        Keycode::S => movement.y += 1.00,
-                        _ => (),
-                    },
-                    None => {}
+                } => match kc {
+                    Keycode::A => movement.x -= 1.00,
+                    Keycode::D => movement.x += 1.00,
+                    Keycode::W => movement.y -= 1.00,
+                    Keycode::S => movement.y += 1.00,
+                    _ => (),
                 },
                 Ev::KeyUp {
-                    keycode,
+                    keycode: Some(kc),
                     repeat: false,
                     ..
-                } => match keycode {
-                    Some(kc) => match kc {
-                        Keycode::A => movement.x += 1.00,
-                        Keycode::D => movement.x -= 1.00,
-                        Keycode::W => movement.y += 1.00,
-                        Keycode::S => movement.y -= 1.00,
-                        _ => (),
-                    },
-                    None => {}
+                } => match kc {
+                    Keycode::A => movement.x += 1.00,
+                    Keycode::D => movement.x -= 1.00,
+                    Keycode::W => movement.y += 1.00,
+                    Keycode::S => movement.y -= 1.00,
+                    _ => (),
                 },
-                _ => {}
+                _ => ()
             }
         }
 
