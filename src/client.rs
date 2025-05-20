@@ -18,8 +18,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         shared,
     };
 
-    let mut sdl = sys::init_sdl()?;
-
     let mut movement = (0, 0);
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((server::HOST, server::PORT))?;
