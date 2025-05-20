@@ -6,6 +6,15 @@ use crate::{Command, FRAME_TIME, Game, Vec2, render, send, server, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
+use crate::{
+    Command, FRAME_TIME, Game, Platform, HOST, LOGICAL_HEIGHT, LOGICAL_WIDTH, PORT, Player, SERVER_HOST,
+    SERVER_PORT, Vec2, render, send, sys,
+};
+
+const PLAYER_SPEED: f32 = 35.;
+const JUMP_VELOCITY: f32 = 20.;
+const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
+const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let mut state = State {
@@ -66,7 +75,9 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 y: movement.1,
             },
         );
-        player_movement(&mut state, movement);
+        
+        player_input(&mut state.shared, state.player_idx, movement);
+        player_movement(&mut state);
         render(&state.shared, &mut sdl.canvas);
         sdl.canvas.present();
 
@@ -81,15 +92,26 @@ struct State {
     shared: crate::Game,
 }
 
-fn player_movement(game: &mut State, movement: (i8, i8)) {
-    const PLAYER_SPEED: f32 = 10.;
-    const JUMP_VELOCITY: f32 = 20.;
-    const GRAVITY: f32 = 9.81;
+fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8)) {
+    game.players[player_idx].velocity =
+        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * (PLAYER_SPEED * DELTA_TIME);
+}
 
-    game.shared.players[game.player_idx].velocity =
-        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_SPEED;
-
+fn player_movement(game: &mut State) {
     for player in &mut game.shared.players {
+        player.velocity += GRAVITY * DELTA_TIME;
         player.pos += player.velocity;
+        
+        dbg!(player.pos);
     }
+}
+
+fn collide(player: &mut Player, platforms: &Vec<Platform>) {
+    for platform in platforms {
+        if platform.pos.x + platform.size.0 + (player.size / 2.)
+    }
+}
+
+fn fix_position(player: &mut Player, platform: &Platform) {
+    let player_relative_posistion = platform.pos - player.pos;
 }

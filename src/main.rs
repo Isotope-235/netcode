@@ -1,7 +1,7 @@
 use std::{
     error::Error,
     net::{Ipv4Addr, UdpSocket},
-    ops::{Add, AddAssign, Mul},
+    ops::{Add, AddAssign, Mul, Sub},
     time::Duration,
 };
 
@@ -24,7 +24,7 @@ const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args();
 
-    let mode = args.nth(1).unwrap();
+    let mode = args.nth(1).unwrap_or_default();
 
     dbg!(&mode);
 
@@ -40,12 +40,12 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
 
     canvas.set_draw_color(Color::BLACK);
     for platform in &game.platforms {
-        let _ = canvas.draw_rect(FRect::new(
-            platform.pos.x,
-            platform.pos.y,
-            platform.size.0,
-            platform.size.1,
-        ));
+        let r = Rect::from_center(
+            Point::new(platform.pos.x as _, platform.pos.y as _),
+            platform.size.0 as _,
+            platform.size.1 as _,
+        );
+        let _ = canvas.fill_rect(r);
     }
 
     for player in &game.players {
@@ -88,7 +88,15 @@ impl Game {
                 color: Color::RED,
                 size: 10.0,
             }],
-            platforms: Vec::new(),
+            platforms: vec![
+                Platform {
+                    size: (60., 20.),
+                    pos: Vec2::new(
+                        (LOGICAL_WIDTH / 2) as _,
+                        (LOGICAL_HEIGHT / 2 + 30) as _,
+                    )
+                }
+            ],
         }
     }
 }
@@ -131,6 +139,16 @@ impl Add for Vec2 {
     }
 }
 
+impl Sub for Vec2 {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vec2 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
 impl AddAssign for Vec2 {
     fn add_assign(&mut self, rhs: Self) {
         self.x = self.x + rhs.x;
@@ -145,13 +163,25 @@ impl Mul<f32> for Vec2 {
     }
 }
 
+impl Mul for Vec2 {
+    type Output = f32;
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.x * rhs.x + self.y * rhs.y
+    }
+}
+
 impl Vec2 {
     fn new(x: f32, y: f32) -> Self {
         Vec2 { x, y }
     }
 
     fn normalize(self) -> Self {
-        self * (1. / self.len())
+        let len = self.len();
+        if len.abs() > 1e-10 {
+            self * (1. / len)
+        } else {
+            self
+        }
     }
 
     fn len(self) -> f32 {
