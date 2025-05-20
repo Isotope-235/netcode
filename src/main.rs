@@ -1,5 +1,5 @@
 use std::{
-    error::Error, net::Ipv4Addr, thread, time::{Duration, Instant}
+    error::Error, net::{Ipv4Addr, UdpSocket}, thread, time::{Duration, Instant}
 };
 
 use sdl3::{
@@ -10,6 +10,7 @@ use sdl3::{
     video::Window,
 };
 
+mod cfg;
 mod networking;
 
 const HOST: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
@@ -91,7 +92,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        send(movement);
+        send(&client, Command { x: movement.0, y: movement.1 });
         render(&state, &mut canvas);
         canvas.present();
 
@@ -128,8 +129,16 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
     }
 }
 
-fn send(moved: (i32, i32)) {
-    println!("sent movement: {:?}", moved);
+#[derive(Debug)]
+struct Command {
+    x: u8,
+    y: u8
+}
+
+fn send(socket: &UdpSocket, moved: Command) {
+    println!("sent movement: {:?}", &moved);
+    let payload: [u8; 2] = unsafe { std::mem::transmute(moved) };
+    socket.send(&payload).unwrap();
 }
 
 struct Game {
