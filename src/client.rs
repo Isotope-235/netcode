@@ -32,9 +32,10 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         let movement = get_input(sdl.events.keyboard_state());
 
-        let mut buf = [0; 64];
+        let mut buf = [0; 2048];
         if let Ok(read) = client.recv(&mut buf) {
             println!("got data: {:?}", &buf[..read]);
+            state.shared = serde_json::from_slice(&buf[..read]).unwrap();
         }
 
         send(&client);
