@@ -1,9 +1,4 @@
-use std::{
-    error::Error,
-    net::UdpSocket,
-    ops::{Add, AddAssign, Mul, Sub},
-    time::Duration,
-};
+use std::{error::Error, net::UdpSocket, time::Duration};
 
 use sdl3::{
     pixels::Color,
@@ -12,14 +7,20 @@ use sdl3::{
     video::Window,
 };
 
+use math::Vec2;
+
 mod client;
+mod math;
 mod networking;
 mod server;
 mod sys;
 
 const LOGICAL_WIDTH: u32 = 160;
 const LOGICAL_HEIGHT: u32 = 120;
-const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
+
+const PLAYER_TOP_SPEED: f32 = 100.;
+const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
+const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args();
@@ -109,68 +110,78 @@ struct Player {
     size: f32,
 }
 
-#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
-struct Vec2 {
-    x: f32,
-    y: f32,
+fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32) {
+    let current_velocity = game.players[player_idx].velocity;
+    let target_velocity =
+        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
+    let velocity_diff = target_velocity - current_velocity;
+    let acceleration = if PLAYER_ACCELERATION * dt < velocity_diff.len() {
+        PLAYER_ACCELERATION * dt
+    } else {
+        velocity_diff.len()
+    };
+
+    game.players[player_idx].velocity =
+        current_velocity + (velocity_diff.normalize() * acceleration);
 }
 
-impl Add for Vec2 {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
-        Vec2 {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
+fn player_movement(game: &mut Game, dt: f32) {
+    for player in &mut game.players {
+        player.velocity += GRAVITY;
+        player.pos += player.velocity * dt;
+
+        collide(player, &game.platforms);
+    }
+}
+
+fn collide(player: &mut Player, platforms: &Vec<Platform>) {
+    let mut collided = true;
+    while collided {
+        collided = false;
+        for platform in platforms {
+            if platform.pos.x + platform.size.0 / 2. > player.pos.x - (player.size / 2.)
+                && platform.pos.x - platform.size.0 / 2. < player.pos.x + (player.size / 2.)
+                && platform.pos.y + platform.size.1 / 2. > player.pos.y - (player.size / 2.)
+                && platform.pos.y - platform.size.1 / 2. < player.pos.y + (player.size / 2.)
+            {
+                collided = true;
+                fix_position(player, platform);
+            }
         }
     }
 }
 
-impl Sub for Vec2 {
-    type Output = Self;
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vec2 {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-        }
-    }
-}
+fn fix_position(player: &mut Player, platform: &Platform) {
+    let player_relative_posistion = player.pos - platform.pos;
 
-impl AddAssign for Vec2 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x = self.x + rhs.x;
-        self.y = self.y + rhs.y;
-    }
-}
+    // These corrected positions are the possible positions to push the
+    // player out of the platform they are currently colliding with
+    let x_direction = if player_relative_posistion.x < 0. {
+        -1.
+    } else {
+        1.
+    };
+    let x_corrected = Vec2::new(
+        platform.pos.x + x_direction * (platform.size.0 / 2. + (player.size / 2.)),
+        platform.pos.y + player_relative_posistion.y,
+    );
 
-impl Mul<f32> for Vec2 {
-    type Output = Self;
-    fn mul(self, rhs: f32) -> Self::Output {
-        Vec2::new(self.x * rhs, self.y * rhs)
-    }
-}
+    let y_direction = if player_relative_posistion.y < 0. {
+        -1.
+    } else {
+        1.
+    };
+    let y_corrected = Vec2::new(
+        platform.pos.x + player_relative_posistion.x,
+        platform.pos.y + y_direction * (platform.size.1 / 2. + (player.size / 2.)),
+    );
 
-impl Mul for Vec2 {
-    type Output = f32;
-    fn mul(self, rhs: Self) -> Self::Output {
-        self.x * rhs.x + self.y * rhs.y
-    }
-}
-
-impl Vec2 {
-    fn new(x: f32, y: f32) -> Self {
-        Vec2 { x, y }
-    }
-
-    fn normalize(self) -> Self {
-        let len = self.len();
-        if len.abs() > 1e-10 {
-            self * (1. / len)
-        } else {
-            self
-        }
-    }
-
-    fn len(self) -> f32 {
-        (self.x.powi(2) + self.y.powi(2)).sqrt()
-    }
+    // Check which position is closest to the players actual location and use that one
+    player.pos = if (player.pos - y_corrected).len() < (player.pos - x_corrected).len() {
+        player.velocity.y = 0.;
+        y_corrected
+    } else {
+        player.velocity.x = 0.;
+        x_corrected
+    };
 }
