@@ -65,8 +65,10 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
     canvas.present();
 }
 
-fn send(socket: &UdpSocket) {
-    let _ = socket.send(&[69, 69]);
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+struct Message {
+    x: i8,
+    y: i8,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]

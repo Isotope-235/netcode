@@ -31,6 +31,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             }
 
             println!("server got data: {:?}", &buf[..read]);
+            dbg!(serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap());
         }
 
         broadcast(&state, &server)?;

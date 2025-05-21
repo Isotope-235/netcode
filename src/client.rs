@@ -2,7 +2,7 @@ use std::error::Error;
 
 use sdl3::keyboard::KeyboardState;
 
-use crate::{FRAME_TIME, Game, Platform, Player, Vec2, render, send, server, sys};
+use crate::{FRAME_TIME, Game, Platform, Player, Vec2, render, server, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
@@ -38,7 +38,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             state.shared = serde_json::from_slice(&buf[..read]).unwrap();
         }
 
-        send(&client);
+        send(&client, movement);
 
         player_input(&mut state.shared, state.player_idx, movement);
         player_movement(&mut state);
@@ -65,6 +65,14 @@ fn get_input(keyboard: KeyboardState<'_>) -> (i8, i8) {
     let y = down as i8 - up as i8;
 
     (x, y)
+}
+
+fn send(socket: &std::net::UdpSocket, movement: (i8, i8)) {
+    let message = crate::Message {
+        x: movement.0,
+        y: movement.1,
+    };
+    let _ = socket.send(&serde_json::to_vec(&message).unwrap());
 }
 
 struct State {
