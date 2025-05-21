@@ -27,7 +27,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     while running {
         let tick = ticker.start();
 
-        running = sdl.should_run();
+        running = sdl.user_has_not_quit();
 
         let movement = get_input(sdl.events.keyboard_state());
 

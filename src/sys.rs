@@ -42,7 +42,7 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
 }
 
 impl SdlContext {
-    pub fn should_run(&mut self) -> bool {
+    pub fn user_has_not_quit(&mut self) -> bool {
         self.events
             .poll_iter()
             .any(|e| matches!(e, sdl3::event::Event::Quit { .. }))
