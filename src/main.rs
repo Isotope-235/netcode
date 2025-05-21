@@ -115,10 +115,10 @@ fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32)
     let target_velocity =
         Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
     let velocity_diff = target_velocity - current_velocity;
-    let acceleration = (PLAYER_ACCELERATION * dt).min(velocity_diff.len());
+    let delta_v = (PLAYER_ACCELERATION * dt.powi(2) / 2.).min(velocity_diff.len());
 
     game.players[player_idx].velocity =
-        current_velocity + (velocity_diff.normalize() * acceleration);
+        current_velocity + (velocity_diff.normalize() * delta_v);
 }
 
 fn simple_player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32) {
@@ -129,7 +129,7 @@ fn simple_player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), d
 
 fn player_movement(game: &mut Game, dt: f32) {
     for player in &mut game.players {
-        //player.velocity += GRAVITY;
+        //player.velocity += GRAVITY * dt.powi(2) / 2.;
         //player.pos += player.velocity * dt;
 
         collide(player, &game.platforms);
