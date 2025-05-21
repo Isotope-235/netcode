@@ -80,9 +80,7 @@ fn handle_client_inputs(
                 Keycode::P => settings.prediction = !settings.prediction,
                 Keycode::R => settings.reconciliation = !settings.reconciliation,
                 Keycode::Plus => settings.ping += Duration::from_millis(50),
-                Keycode::Minus => {
-                    settings.ping -= Duration::from_millis(50).min(Duration::from_millis(0))
-                }
+                Keycode::Minus => settings.ping -= Duration::from_millis(50).min(settings.ping),
                 _ => (),
             },
             Ev::KeyUp {
