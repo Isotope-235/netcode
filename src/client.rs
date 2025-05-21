@@ -2,13 +2,13 @@ use std::{error::Error, time::Duration};
 
 use sdl3::keyboard::KeyboardState;
 
-use crate::{Game, Platform, Player, Vec2, render, server, sys};
+use crate::{Game, render, server, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
-const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
+pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {

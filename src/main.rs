@@ -1,4 +1,4 @@
-use std::{error::Error, net::UdpSocket, time::Duration};
+use std::error::Error;
 
 use sdl3::{
     pixels::Color,
@@ -115,11 +115,7 @@ fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32)
     let target_velocity =
         Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
     let velocity_diff = target_velocity - current_velocity;
-    let acceleration = if PLAYER_ACCELERATION * dt < velocity_diff.len() {
-        PLAYER_ACCELERATION * dt
-    } else {
-        velocity_diff.len()
-    };
+    let acceleration = (PLAYER_ACCELERATION * dt).min(velocity_diff.len());
 
     game.players[player_idx].velocity =
         current_velocity + (velocity_diff.normalize() * acceleration);

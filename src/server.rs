@@ -5,7 +5,7 @@ use crate::{Game, render, sys};
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
 
-const FRAME_TIME: Duration = Duration::from_millis(300);
+const FRAME_TIME: Duration = Duration::from_millis(1000);
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
@@ -19,7 +19,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
     let ticker = sys::ticker(FRAME_TIME);
 
-    let mut movement: (i8, i8) = (0, 0);
     let mut running = true;
     while running {
         let tick = ticker.start();
@@ -32,12 +31,11 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
                 state.clients.push(origin);
             }
 
-            println!("server got data: {:?}", &buf[..read]);
             let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
-            movement = (message.x, message.y);
+            let movement = (message.x, message.y);
+            crate::player_input(&mut state.shared, 0, movement, crate::client::DELTA_TIME);
         }
 
-        crate::player_input(&mut state.shared, 0, movement, DELTA_TIME);
         crate::player_movement(&mut state.shared, DELTA_TIME);
         broadcast(&state, &server)?;
         render(&state.shared, &mut sdl.canvas);
@@ -57,7 +55,9 @@ struct State {
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     let serialized_state = serde_json::to_vec(&state.shared).unwrap();
     for addr in &state.clients {
-        socket.send_to(&serialized_state, addr)?;
+        if let Err(e) = socket.send_to(&serialized_state, addr) {
+            println!("{}", e);
+        };
     }
 
     Ok(())
