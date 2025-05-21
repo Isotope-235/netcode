@@ -1,9 +1,8 @@
 use std::{error::Error, time::Duration};
 
-use sdl3::{
+use sdl2::{
     EventPump,
-    keyboard::{KeyboardState, Keycode, Scancode as Sc},
-    sys::events,
+    keyboard::{KeyboardState, Keycode, Scancode as Sc}
 };
 
 use crate::{Game, player_input, player_movement, render, server, simple_player_input, sys};
@@ -64,7 +63,7 @@ fn handle_client_inputs(
     running: &mut bool,
 ) {
     for event in events.poll_iter() {
-        use sdl3::event::Event as Ev;
+        use sdl2::event::Event as Ev;
 
         match event {
             Ev::Quit { .. } => *running = false,

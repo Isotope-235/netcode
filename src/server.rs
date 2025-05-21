@@ -1,6 +1,6 @@
 use std::{error::Error, io, net::UdpSocket, time::Duration};
 
-use sdl3::EventPump;
+use sdl2::EventPump;
 
 use crate::{Game, render, sys};
 
@@ -67,7 +67,7 @@ fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
 
 fn handle_server_inputs(events: &mut EventPump, running: &mut bool) {
     for event in events.poll_iter() {
-        use sdl3::event::Event as Ev;
+        use sdl2::event::Event as Ev;
 
         match event {
             Ev::Quit { .. } => *running = false,

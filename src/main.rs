@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use sdl3::{
+use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
     render::Canvas,
