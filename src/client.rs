@@ -1,4 +1,4 @@
-use std::{error::Error, thread::current};
+use std::error::Error;
 
 use sdl3::keyboard::KeyboardState;
 
@@ -8,7 +8,7 @@ const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
 
 const PLAYER_TOP_SPEED: f32 = 100.;
-const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED*5.;
+const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
@@ -73,15 +73,16 @@ struct State {
 
 fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8)) {
     let current_velocity = game.players[player_idx].velocity;
-    let target_velocity = Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
+    let target_velocity =
+        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
     let velocity_diff = target_velocity - current_velocity;
     let acceleration = if PLAYER_ACCELERATION * DELTA_TIME < velocity_diff.len() {
         PLAYER_ACCELERATION * DELTA_TIME
     } else {
         velocity_diff.len()
     };
-    
-    game.players[player_idx].velocity = 
+
+    game.players[player_idx].velocity =
         current_velocity + (velocity_diff.normalize() * acceleration);
 }
 
