@@ -117,8 +117,7 @@ fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32)
     let velocity_diff = target_velocity - current_velocity;
     let delta_v = (PLAYER_ACCELERATION * dt.powi(2) / 2.).min(velocity_diff.len());
 
-    game.players[player_idx].velocity =
-        current_velocity + (velocity_diff.normalize() * delta_v);
+    game.players[player_idx].velocity = current_velocity + (velocity_diff.normalize() * delta_v);
 }
 
 fn simple_player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32) {

@@ -2,7 +2,7 @@ use std::{error::Error, time::Duration};
 
 use sdl2::{
     EventPump,
-    keyboard::{KeyboardState, Keycode, Scancode as Sc}
+    keyboard::{KeyboardState, Keycode, Scancode as Sc},
 };
 
 use crate::{Game, player_input, player_movement, render, server, simple_player_input, sys};

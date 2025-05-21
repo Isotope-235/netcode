@@ -26,10 +26,7 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
         .window(TITLE, LOGICAL_WIDTH * SCALE, LOGICAL_HEIGHT * SCALE)
         .build()?;
     let mut canvas = window.into_canvas().build()?;
-    canvas.set_logical_size(
-        LOGICAL_WIDTH,
-        LOGICAL_HEIGHT,
-    )?;
+    canvas.set_logical_size(LOGICAL_WIDTH, LOGICAL_HEIGHT)?;
     canvas.set_integer_scale(true)?;
     canvas.set_blend_mode(BlendMode::None);
 
