@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, thread::current};
 
 use sdl3::keyboard::KeyboardState;
 
@@ -7,7 +7,8 @@ use crate::{FRAME_TIME, Game, Platform, Player, Vec2, render, send, server, sys}
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
 
-const PLAYER_SPEED: f32 = 35.;
+const PLAYER_TOP_SPEED: f32 = 100.;
+const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED*5.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
@@ -71,14 +72,23 @@ struct State {
 }
 
 fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8)) {
-    game.players[player_idx].velocity =
-        Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * (PLAYER_SPEED * DELTA_TIME);
+    let current_velocity = game.players[player_idx].velocity;
+    let target_velocity = Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
+    let velocity_diff = target_velocity - current_velocity;
+    let acceleration = if PLAYER_ACCELERATION * DELTA_TIME < velocity_diff.len() {
+        PLAYER_ACCELERATION * DELTA_TIME
+    } else {
+        velocity_diff.len()
+    };
+    
+    game.players[player_idx].velocity = 
+        current_velocity + (velocity_diff.normalize() * acceleration);
 }
 
 fn player_movement(game: &mut State) {
     for player in &mut game.shared.players {
-        player.velocity += GRAVITY * DELTA_TIME;
-        player.pos += player.velocity;
+        player.velocity += GRAVITY;
+        player.pos += player.velocity * DELTA_TIME;
 
         collide(player, &game.shared.platforms);
     }
@@ -128,8 +138,10 @@ fn fix_position(player: &mut Player, platform: &Platform) {
 
     // Check which position is closest to the players actual location and use that one
     player.pos = if (player.pos - y_corrected).len() < (player.pos - x_corrected).len() {
+        player.velocity.y = 0.;
         y_corrected
     } else {
+        player.velocity.x = 0.;
         x_corrected
     };
 }
