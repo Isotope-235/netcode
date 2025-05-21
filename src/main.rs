@@ -52,7 +52,7 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
     }
 
     for player in &game.players {
-        canvas.set_draw_color(player.color);
+        canvas.set_draw_color(Color::RED);
         let r = Rect::from_center(
             Point::new(player.pos.x as _, player.pos.y as _),
             player.size as _,
@@ -68,6 +68,7 @@ fn send(socket: &UdpSocket) {
     let _ = socket.send(&[69, 69]);
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 struct Game {
     platforms: Vec<Platform>,
     players: Vec<Player>,
@@ -82,7 +83,6 @@ impl Game {
                     y: (LOGICAL_HEIGHT / 2) as _,
                 },
                 velocity: Vec2::new(0., 0.),
-                color: Color::RED,
                 size: 10.0,
             }],
             platforms: vec![Platform {
@@ -93,20 +93,20 @@ impl Game {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Platform {
     size: (f32, f32),
     pos: Vec2,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 struct Player {
     pos: Vec2,
     velocity: Vec2,
     size: f32,
-    color: Color,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 struct Vec2 {
     x: f32,
     y: f32,

@@ -31,6 +31,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             println!("server got data: {:?}", &buf[..read]);
         }
 
+        broadcast(&state, &server)?;
         render(&state.shared, &mut sdl.canvas);
 
         tick.wait();
@@ -46,8 +47,9 @@ struct State {
 
 #[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
+    let serialized_state = serde_json::to_vec(&state.shared).unwrap();
     for addr in &state.clients {
-        socket.send_to(&[69], addr)?;
+        socket.send_to(&serialized_state, addr)?;
     }
 
     Ok(())
