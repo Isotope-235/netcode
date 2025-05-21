@@ -1,5 +1,7 @@
 use std::{error::Error, io, net::UdpSocket, time::Duration};
 
+use sdl3::EventPump;
+
 use crate::{Game, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
@@ -23,7 +25,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     while running {
         let tick = ticker.start();
 
-        running = sdl.user_has_not_quit();
+        handle_server_inputs(&mut sdl.events, &mut running);
 
         let mut buf = [0; 64];
         while let Ok((read, origin)) = server.recv_from(&mut buf) {
@@ -61,4 +63,15 @@ fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn handle_server_inputs(events: &mut EventPump, running: &mut bool) {
+    for event in events.poll_iter() {
+        use sdl3::event::Event as Ev;
+
+        match event {
+            Ev::Quit { .. } => *running = false,
+            _ => (),
+        }
+    }
 }
