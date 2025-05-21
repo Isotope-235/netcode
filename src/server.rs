@@ -1,9 +1,11 @@
-use std::{error::Error, io, net::UdpSocket};
+use std::{error::Error, io, net::UdpSocket, time::Duration};
 
-use crate::{FRAME_TIME, Game, render, sys};
+use crate::{Game, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
+
+const FRAME_TIME: Duration = Duration::from_millis(1000);
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
