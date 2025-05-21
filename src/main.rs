@@ -31,6 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sdl = sys::init_sdl()?;
     let shared_state = Game::new();
 
+    #[allow(clippy::wildcard_in_or_patterns)]
     match &mode[..] {
         "server" | "--server" => server::run(sdl, shared_state),
         "client" | "--client" | _ => client::run(sdl, shared_state),
