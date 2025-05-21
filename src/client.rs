@@ -29,7 +29,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         running = sdl.user_has_not_quit();
 
         let movement = get_input(sdl.events.keyboard_state());
-        send(&client, movement);
+        send(client.try_clone()?, movement);
 
         let mut buf = [0; 2048];
         while let Ok(read) = client.recv(&mut buf) {
@@ -68,12 +68,15 @@ fn get_input(keyboard: KeyboardState<'_>) -> (i8, i8) {
     (x, y)
 }
 
-fn send(socket: &std::net::UdpSocket, movement: (i8, i8)) {
+fn send(socket: std::net::UdpSocket, movement: (i8, i8)) {
     let message = crate::Message {
         x: movement.0,
         y: movement.1,
     };
-    let _ = socket.send(&serde_json::to_vec(&message).unwrap());
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(250));
+        let _ = socket.send(&serde_json::to_vec(&message).unwrap());
+    });
 }
 
 struct State {
