@@ -23,7 +23,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         reconciliation: true,
         interpolation: true,
         prediction: true,
-        ping: Duration::from_millis(100),
+        ping: Duration::from_millis(250),
     };
 
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
@@ -39,7 +39,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         handle_client_inputs(&mut sdl.events, &mut settings, &mut movement, &mut running);
 
-        send(client.try_clone()?, movement);
+        send(client.try_clone()?, settings.ping / 2, movement);
 
         let mut buf = [0; 2048];
         while let Ok(read) = client.recv(&mut buf) {
@@ -104,13 +104,13 @@ fn predict(state: &mut State, movement: (i8, i8)) {
     player_movement(&mut state.shared, DELTA_TIME);
 }
 
-fn send(socket: std::net::UdpSocket, movement: (i8, i8)) {
+fn send(socket: std::net::UdpSocket, delay: Duration, movement: (i8, i8)) {
     let message = crate::Message {
         x: movement.0,
         y: movement.1,
     };
     std::thread::spawn(move || {
-        std::thread::sleep(Duration::from_millis(250));
+        std::thread::sleep(delay);
         let _ = socket.send(&serde_json::to_vec(&message).unwrap());
     });
 }
