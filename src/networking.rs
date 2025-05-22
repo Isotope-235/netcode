@@ -54,7 +54,7 @@ impl Client {
         })
     }
 
-    pub fn try_iter(&self) -> mpsc::TryIter<Box<[u8]>> {
+    pub fn recv(&self) -> mpsc::TryIter<Box<[u8]>> {
         self.receiver.try_iter()
     }
 

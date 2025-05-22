@@ -37,7 +37,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         };
         client.send(&message);
 
-        for bytes in client.try_iter() {
+        for bytes in client.recv() {
             state.shared = serde_json::from_slice(&bytes).unwrap();
         }
 
