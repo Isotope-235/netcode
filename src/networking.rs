@@ -12,13 +12,13 @@ use std::{
 fn spawn_sender(
     socket: net::UdpSocket,
     tx: mpsc::Sender<Box<[u8]>>,
-    simulated_ping_ms: Arc<AtomicU64>,
+    ping_ms: Arc<AtomicU64>,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let mut buf = [0; u16::MAX as _];
         loop {
             if let Ok(read) = socket.recv(&mut buf) {
-                let delay = load_delay(&simulated_ping_ms);
+                let delay = load_delay(&ping_ms);
                 let tx_ref = tx.clone();
                 thread::spawn(move || {
                     thread::sleep(delay);
@@ -37,7 +37,7 @@ fn load_delay(ms: &AtomicU64) -> Duration {
 }
 
 pub struct Client {
-    simulated_ping_ms: Arc<AtomicU64>,
+    ping_ms: Arc<AtomicU64>,
     socket: net::UdpSocket,
     sending_thread: thread::JoinHandle<()>,
     receiver: mpsc::Receiver<Box<[u8]>>,
@@ -54,17 +54,21 @@ impl Client {
         socket.connect(remote)?;
 
         let (tx, receiver) = mpsc::channel();
-        let simulated_ping_ms = Arc::new(AtomicU64::new(simulated_ping_ms));
+        let ping_ms = Arc::new(AtomicU64::new(simulated_ping_ms));
         let socket_ref = socket.try_clone()?;
 
-        let sending_thread = spawn_sender(socket_ref, tx, Arc::clone(&simulated_ping_ms));
+        let sending_thread = spawn_sender(socket_ref, tx, Arc::clone(&ping_ms));
 
         Ok(Self {
-            simulated_ping_ms,
+            ping_ms,
             socket,
             sending_thread,
             receiver,
         })
+    }
+
+    pub fn set_ping(&self, ms: u64) {
+        self.ping_ms.store(ms, Ordering::Relaxed);
     }
 
     pub fn recv(&self) -> mpsc::TryIter<Box<[u8]>> {
@@ -74,7 +78,7 @@ impl Client {
     pub fn send(&self, msg: &impl serde::Serialize) -> io::Result<()> {
         let socket = self.socket.try_clone()?;
         let serialized = serde_json::to_vec(msg).unwrap();
-        let delay = load_delay(&self.simulated_ping_ms);
+        let delay = load_delay(&self.ping_ms);
         thread::spawn(move || {
             thread::sleep(delay);
             let _ = socket.send(&serialized);
