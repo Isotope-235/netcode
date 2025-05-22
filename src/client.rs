@@ -20,7 +20,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         reconciliation: true,
         interpolation: true,
         prediction: true,
-        ping: Duration::from_millis(200),
+        ping: Duration::from_millis(250),
     };
 
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
