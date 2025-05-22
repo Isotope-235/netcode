@@ -114,15 +114,16 @@ impl Game {
             Vec2::new(movement.0 as _, movement.1 as _).normalize() * PLAYER_TOP_SPEED;
         self.players[player_idx].pos += target_velocity * dt;
     }
-    
+
     fn player_input(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
         let current_velocity = self.players[player_idx].velocity;
         let target_velocity =
             Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
         let velocity_diff = target_velocity - current_velocity;
         let delta_v = (PLAYER_ACCELERATION * dt).min(velocity_diff.len());
-    
-        self.players[player_idx].velocity = current_velocity + (velocity_diff.normalize() * delta_v);
+
+        self.players[player_idx].velocity =
+            current_velocity + (velocity_diff.normalize() * delta_v);
     }
 }
 
@@ -138,7 +139,6 @@ struct Player {
     velocity: Vec2,
     size: f32,
 }
-
 
 fn collide(player: &mut Player, platforms: &Vec<Platform>) {
     let mut collided = true;
