@@ -19,11 +19,11 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         reconciliation: true,
         interpolation: true,
         prediction: true,
-        ping: Duration::from_millis(250),
+        ping_ms: 250,
     };
 
     let client =
-        networking::Client::connect((server::HOST, server::PORT), settings.ping.as_millis() as _)?;
+        networking::Client::connect((server::HOST, server::PORT), settings.ping_ms)?;
 
     let ticker = sys::ticker(FRAME_TIME);
 
@@ -132,8 +132,8 @@ fn handle_client_inputs(
                 Keycode::I => settings.interpolation = !settings.interpolation,
                 Keycode::P => settings.prediction = !settings.prediction,
                 Keycode::R => settings.reconciliation = !settings.reconciliation,
-                Keycode::Plus => settings.ping += Duration::from_millis(50),
-                Keycode::Minus => settings.ping -= Duration::from_millis(50).min(settings.ping),
+                Keycode::Plus => settings.ping_ms += 50,
+                Keycode::Minus => settings.ping_ms -= 50.min(settings.ping_ms),
                 _ => (),
             },
             Ev::KeyUp {
@@ -171,7 +171,7 @@ struct Settings {
     reconciliation: bool,
     prediction: bool,
     interpolation: bool,
-    ping: Duration,
+    ping_ms: u64,
 }
 
 impl Display for Settings {
@@ -179,7 +179,7 @@ impl Display for Settings {
         write!(
             f,
             "Reconciliation: {}\nInterpolation: {}\nPrediction: {}\nPing: {:?}",
-            self.reconciliation, self.interpolation, self.prediction, self.ping
+            self.reconciliation, self.interpolation, self.prediction, Duration::from_millis(self.ping_ms)
         )
     }
 }
