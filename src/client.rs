@@ -26,8 +26,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((server::HOST, server::PORT))?;
 
-    // TODO fix this for 250ms++ ping
-    // it only seems to work right under 200ms
     let (tx, rx) = std::sync::mpsc::channel();
 
     let client_ref = client.try_clone()?;
@@ -37,8 +35,10 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             let tx_ref = tx.clone();
             match client_ref.recv(&mut buf) {
                 Ok(read) => {
-                    std::thread::sleep(settings.ping / 2);
-                    std::thread::spawn(move || tx_ref.send((read, buf)).unwrap());
+                    std::thread::spawn(move || {
+                        std::thread::sleep(settings.ping / 2);
+                        tx_ref.send((read, buf)).unwrap();
+                    });
                 }
                 Err(e) => eprintln!("recv error: {e}"),
             }
