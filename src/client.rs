@@ -37,7 +37,6 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             let tx_ref = tx.clone();
             match client_ref.recv(&mut buf) {
                 Ok(read) => {
-                    println!("incoming");
                     std::thread::sleep(settings.ping / 2);
                     std::thread::spawn(move || tx_ref.send((read, buf)).unwrap());
                 }
