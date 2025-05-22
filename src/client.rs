@@ -2,10 +2,7 @@ use std::{error::Error, time::Duration};
 
 use sdl2::{EventPump, keyboard::Keycode};
 
-use crate::{Game, player_input, render, server, sys};
-
-const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
-const PORT: u16 = 0;
+use crate::{Game, networking, player_input, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
@@ -23,27 +20,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         ping: Duration::from_millis(250),
     };
 
-    let client = std::net::UdpSocket::bind((HOST, PORT))?;
-    client.connect((server::HOST, server::PORT))?;
-
-    let (tx, rx) = std::sync::mpsc::channel();
-
-    let client_ref = client.try_clone()?;
-    std::thread::spawn(move || {
-        loop {
-            let mut buf = [0; 2048];
-            let tx_ref = tx.clone();
-            match client_ref.recv(&mut buf) {
-                Ok(read) => {
-                    std::thread::spawn(move || {
-                        std::thread::sleep(settings.ping / 2);
-                        tx_ref.send((read, buf)).unwrap();
-                    });
-                }
-                Err(e) => eprintln!("recv error: {e}"),
-            }
-        }
-    });
+    let client = networking::Client::connect((server::HOST, server::PORT), settings.ping)?;
 
     let ticker = sys::ticker(FRAME_TIME);
 
@@ -54,9 +31,13 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         handle_client_inputs(&mut sdl.events, &mut settings, &mut movement, &mut running);
 
-        send(client.try_clone()?, settings.ping / 2, movement);
+        let message = crate::Message {
+            x: movement.0,
+            y: movement.1,
+        };
+        client.send(&message);
 
-        for (read, buf) in rx.try_iter() {
+        for (read, buf) in client.try_iter() {
             state.shared = serde_json::from_slice(&buf[..read]).unwrap();
         }
 
@@ -117,17 +98,6 @@ fn predict(state: &mut State, movement: (i8, i8)) {
         .shared
         .simple_player_input(state.player_idx, movement, DELTA_TIME);
     state.shared.player_movement(DELTA_TIME);
-}
-
-fn send(socket: std::net::UdpSocket, delay: Duration, movement: (i8, i8)) {
-    let message = crate::Message {
-        x: movement.0,
-        y: movement.1,
-    };
-    std::thread::spawn(move || {
-        std::thread::sleep(delay);
-        let _ = socket.send(&serde_json::to_vec(&message).unwrap());
-    });
 }
 
 struct State {
