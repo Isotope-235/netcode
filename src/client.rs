@@ -33,6 +33,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         let tick = ticker.start();
 
         handle_client_inputs(&mut sdl.events, &mut settings, &mut movement, &mut running);
+        client.set_ping(settings.ping_ms);
 
         // Handling of movement history for reconciliation
         let movement_id = movement_history.last().unwrap_or(&((0, 0), 0)).1 + 1;
@@ -131,9 +132,18 @@ fn handle_client_inputs(
                 Keycode::I => settings.interpolation = !settings.interpolation,
                 Keycode::P => settings.prediction = !settings.prediction,
                 Keycode::R => settings.reconciliation = !settings.reconciliation,
-                Keycode::Plus => settings.ping_ms += 50,
-                Keycode::Minus => settings.ping_ms -= 50.min(settings.ping_ms),
+                Keycode::Plus => settings.increment_ping(),
+                Keycode::Minus => settings.decrement_ping(),
                 _ => (),
+            },
+            Ev::KeyDown {
+                keycode: Some(kc),
+                repeat: true,
+                ..
+            } => match kc {
+                Keycode::Plus => settings.increment_ping(),
+                Keycode::Minus => settings.decrement_ping(),
+                _ => {}
             },
             Ev::KeyUp {
                 keycode: Some(kc),
@@ -171,6 +181,18 @@ struct Settings {
     prediction: bool,
     interpolation: bool,
     ping_ms: u64,
+}
+
+impl Settings {
+    const PING_INTERVAL: u64 = 50;
+
+    pub fn increment_ping(&mut self) {
+        self.ping_ms += Self::PING_INTERVAL;
+    }
+
+    pub fn decrement_ping(&mut self) {
+        self.ping_ms -= Self::PING_INTERVAL.min(self.ping_ms);
+    }
 }
 
 impl Display for Settings {
