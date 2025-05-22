@@ -2,7 +2,7 @@ use std::{error::Error, io, net::UdpSocket, time::Duration};
 
 use sdl2::EventPump;
 
-use crate::{Game, render, sys};
+use crate::{Game, ServerResponse, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
@@ -85,7 +85,12 @@ struct AckMessage {
 #[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     for (i, addr) in state.clients.iter().enumerate() {
-        let serialized_state = serde_json::to_vec(&(&state.shared, state.last_acc[i], i)).unwrap();
+        let response = ServerResponse {
+            game: state.shared.clone(),
+            ack_id: state.last_acc[i],
+            player_idx: i,
+        };
+        let serialized_state = serde_json::to_vec(&response).unwrap();
         if let Err(e) = socket.send_to(&serialized_state, addr) {
             println!("{e}");
         };

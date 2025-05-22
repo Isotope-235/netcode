@@ -1,10 +1,14 @@
-use std::{error::Error, fmt::Display, time::Duration};
+use std::{
+    error::Error,
+    fmt::Display,
+    time::{Duration, Instant},
+};
 
 use sdl2::{
     EventPump, keyboard::Keycode, pixels::Color, rect::Rect, render::Canvas, ttf, video::Window,
 };
 
-use crate::{Game, networking, render, server, sys};
+use crate::{Game, ServerResponse, networking, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
@@ -28,6 +32,12 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
     let mut movement: (i8, i8) = (0, 0);
     let mut movement_history: Vec<((i8, i8), usize)> = vec![(movement, 1)];
+
+    let mut players_prev = vec![];
+    let mut players_current = vec![];
+    let mut server_frame_time = Duration::from_millis(100); // initial guess, this gets changed
+    let mut server_timestamp = Instant::now();
+
     let mut running = true;
     while running {
         let tick = ticker.start();
@@ -49,9 +59,14 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         let mut move_ack_id: usize = 0;
         for bytes in client.recv() {
-            let player_idx: usize;
-            (state.shared, move_ack_id, player_idx) = serde_json::from_slice(&bytes).unwrap();
-            state.player_idx = Some(player_idx);
+            let server_response: ServerResponse = serde_json::from_slice(&bytes).unwrap();
+            state.player_idx = Some(server_response.player_idx);
+            players_prev = players_current;
+            state.shared = server_response.game;
+            players_current = state.shared.players.clone();
+            move_ack_id = server_response.ack_id;
+            server_frame_time = server_timestamp.elapsed();
+            server_timestamp = Instant::now();
         }
 
         if move_ack_id != 0 {
@@ -64,6 +79,19 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         if settings.prediction {
             predict(&mut state, movement)
         };
+
+        if settings.interpolation {
+            let interpolation_float = (server_timestamp.elapsed().as_secs_f32()
+                / server_frame_time.as_secs_f32())
+            .min(1.);
+            interpolate(
+                &mut state,
+                &players_prev,
+                &players_current,
+                interpolation_float,
+            );
+        }
+
         render(&state.shared, &mut sdl.canvas);
         render_settings(&settings, &mut sdl.canvas);
         sdl.canvas.present();
@@ -72,6 +100,23 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     }
 
     Ok(())
+}
+
+fn interpolate(
+    state: &mut State,
+    players_prev: &[crate::Player],
+    players_current: &[crate::Player],
+    interpolation_float: f32,
+) {
+    let player_idx = state.player_idx.unwrap_or(players_prev.len());
+    for (i, player) in players_prev.iter().enumerate() {
+        if i == player_idx {
+            continue;
+        }
+
+        let pos_diff = players_current[i].pos - player.pos;
+        state.shared.players[i].pos = player.pos + (pos_diff * interpolation_float);
+    }
 }
 
 fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {

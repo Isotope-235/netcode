@@ -84,6 +84,13 @@ struct Message {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+struct ServerResponse {
+    ack_id: usize,
+    player_idx: usize,
+    game: Game,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 struct Game {
     platforms: Vec<Platform>,
     players: Vec<Player>,
@@ -133,7 +140,7 @@ struct Platform {
     pos: Vec2,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 struct Player {
     pos: Vec2,
     velocity: Vec2,
