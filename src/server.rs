@@ -35,7 +35,9 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
             let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
-            crate::simple_player_input(&mut state.shared, 0, movement, crate::client::DELTA_TIME);
+            state
+                .shared
+                .simple_player_input(0, movement, crate::client::DELTA_TIME);
         }
 
         state.shared.player_movement(DELTA_TIME);
