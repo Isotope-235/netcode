@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error};
 
 use sdl2::{
     pixels::Color,
@@ -21,6 +21,8 @@ const LOGICAL_HEIGHT: u32 = 240;
 const PLAYER_TOP_SPEED: f32 = 100.;
 const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
+
+const PLAYER_COLORS: &[Color] = &[Color::RED, Color::BLUE, Color::MAGENTA, Color::GREEN, Color::YELLOW, Color::CYAN];
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args();
@@ -53,8 +55,9 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
         let _ = canvas.fill_rect(r);
     }
 
-    for player in &game.players {
-        canvas.set_draw_color(Color::RED);
+    for (i, player) in game.players.iter().enumerate() {
+        if i >= PLAYER_COLORS.len() { panic!("Not enough colors :("); }
+        canvas.set_draw_color(PLAYER_COLORS[i]);
         let r = Rect::from_center(
             Point::new(player.pos.x as _, player.pos.y as _),
             player.size as _,
@@ -80,14 +83,7 @@ struct Game {
 impl Game {
     fn new() -> Self {
         Self {
-            players: vec![Player {
-                pos: Vec2 {
-                    x: (LOGICAL_WIDTH / 2) as _,
-                    y: (LOGICAL_HEIGHT / 2) as _,
-                },
-                velocity: Vec2::new(0., 0.),
-                size: 10.0,
-            }],
+            players: vec![],
             platforms: vec![Platform {
                 size: (60., 20.),
                 pos: Vec2::new((LOGICAL_WIDTH / 2) as _, (LOGICAL_HEIGHT / 2 + 30) as _),

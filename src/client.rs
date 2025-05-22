@@ -11,7 +11,7 @@ pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
-        player_idx: 0,
+        player_idx: None,
         shared,
     };
 
@@ -48,7 +48,9 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         let mut move_ack_id: usize = 0;
         for bytes in client.recv() {
-            (state.shared, move_ack_id) = serde_json::from_slice(&bytes).unwrap();
+            let player_idx: usize;
+            (state.shared, move_ack_id, player_idx) = serde_json::from_slice(&bytes).unwrap();
+            state.player_idx = Some(player_idx);
         }
 
         if move_ack_id != 0 {
@@ -73,10 +75,11 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
 fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
     for movement in movement_history {
-        // TODO make player_idx not hardcoded
-        state
-            .shared
-            .simple_player_input(state.player_idx, movement.0, DELTA_TIME);
+        if let Some(player_idx) = state.player_idx {
+            state
+                .shared
+                .simple_player_input(player_idx, movement.0, DELTA_TIME);
+        }
         state.shared.player_movement(DELTA_TIME);
     }
 }
@@ -149,14 +152,16 @@ fn handle_client_inputs(
 }
 
 fn predict(state: &mut State, movement: (i8, i8)) {
-    state
-        .shared
-        .simple_player_input(state.player_idx, movement, DELTA_TIME);
+    if let Some(player_idx) = state.player_idx {
+        state
+            .shared
+            .simple_player_input(player_idx, movement, DELTA_TIME);
+    }
     state.shared.player_movement(DELTA_TIME);
 }
 
 struct State {
-    player_idx: usize,
+    player_idx: Option<usize>,
     shared: crate::Game,
 }
 

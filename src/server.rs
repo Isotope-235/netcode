@@ -12,7 +12,7 @@ const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
-        last_acc: vec![0],
+        last_acc: vec![],
         clients: Vec::new(),
         shared,
     };
@@ -30,18 +30,37 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         let mut buf = [0; 64];
         while let Ok((read, origin)) = server.recv_from(&mut buf) {
-            if !state.clients.contains(&origin) {
-                state.clients.push(origin);
+            
+            let mut player_idx = state.clients.len();
+            for (i, client) in state.clients.iter().enumerate() {
+                if *client == origin {
+                    player_idx = i;
+                }
             }
-
+            
+            
+            if player_idx >= state.clients.len() {
+                state.clients.push(origin);
+                state.last_acc.push(0);
+                state.shared.players.push(
+                    crate::Player {
+                        pos: crate::Vec2 {
+                            x: (crate::LOGICAL_WIDTH / 2) as _,
+                            y: (crate::LOGICAL_HEIGHT / 2) as _,
+                        },
+                        velocity: crate::Vec2::new(0., 0.),
+                        size: 10.0,
+                    }
+                );
+            }
+            
             let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
 
-            // TODO make player_idx not hardcoded
-            state.last_acc[0] = message.id;
+            state.last_acc[player_idx] = message.id;
             state
                 .shared
-                .simple_player_input(0, movement, crate::client::DELTA_TIME);
+                .simple_player_input(player_idx, movement, crate::client::DELTA_TIME);
         }
 
         state.shared.player_movement(DELTA_TIME);
@@ -69,10 +88,10 @@ struct AckMessage {
 
 #[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
-    let serialized_state = serde_json::to_vec(&(&state.shared, state.last_acc[0])).unwrap();
-    for addr in &state.clients {
+    for (i, addr) in state.clients.iter().enumerate() {
+        let serialized_state = serde_json::to_vec(&(&state.shared, state.last_acc[i], i)).unwrap();
         if let Err(e) = socket.send_to(&serialized_state, addr) {
-            println!("{}", e);
+            println!("{e}");
         };
     }
 
