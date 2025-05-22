@@ -15,8 +15,8 @@ mod networking;
 mod server;
 mod sys;
 
-const LOGICAL_WIDTH: u32 = 160;
-const LOGICAL_HEIGHT: u32 = 120;
+const LOGICAL_WIDTH: u32 = 320;
+const LOGICAL_HEIGHT: u32 = 240;
 
 const PLAYER_TOP_SPEED: f32 = 100.;
 const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
@@ -62,12 +62,11 @@ fn render(game: &Game, canvas: &mut Canvas<Window>) {
         );
         let _ = canvas.fill_rect(r);
     }
-
-    canvas.present();
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 struct Message {
+    id: usize,
     x: i8,
     y: i8,
 }
@@ -98,8 +97,8 @@ impl Game {
 
     fn player_movement(&mut self, dt: f32) {
         for player in &mut self.players {
-            //player.velocity += GRAVITY * dt.powi(2) / 2.;
-            //player.pos += player.velocity * dt;
+            // player.velocity += GRAVITY * dt;
+            // player.pos += player.velocity * dt;
 
             collide(player, &self.platforms);
         }
@@ -130,7 +129,7 @@ fn player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), dt: f32)
     let target_velocity =
         Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
     let velocity_diff = target_velocity - current_velocity;
-    let delta_v = (PLAYER_ACCELERATION * dt.powi(2) / 2.).min(velocity_diff.len());
+    let delta_v = (PLAYER_ACCELERATION * dt).min(velocity_diff.len());
 
     game.players[player_idx].velocity = current_velocity + (velocity_diff.normalize() * delta_v);
 }

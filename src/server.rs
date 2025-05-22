@@ -12,6 +12,7 @@ const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
+        last_acc: vec![0],
         clients: Vec::new(),
         shared,
     };
@@ -35,6 +36,9 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
             let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
+
+            // TODO make player_idx not hardcoded
+            state.last_acc[0] = message.id;
             state
                 .shared
                 .simple_player_input(0, movement, crate::client::DELTA_TIME);
@@ -43,6 +47,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         state.shared.player_movement(DELTA_TIME);
         broadcast(&state, &server)?;
         render(&state.shared, &mut sdl.canvas);
+        sdl.canvas.present();
 
         tick.wait();
     }
@@ -51,13 +56,20 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 }
 
 struct State {
+    last_acc: Vec<usize>,
     clients: Vec<std::net::SocketAddr>,
     shared: crate::Game,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct AckMessage {
+    last_acc: usize,
+    game: crate::Game,
+}
+
 #[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
-    let serialized_state = serde_json::to_vec(&state.shared).unwrap();
+    let serialized_state = serde_json::to_vec(&(&state.shared, state.last_acc[0])).unwrap();
     for addr in &state.clients {
         if let Err(e) = socket.send_to(&serialized_state, addr) {
             println!("{}", e);

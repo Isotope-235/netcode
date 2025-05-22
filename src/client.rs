@@ -1,6 +1,14 @@
-use std::{error::Error, time::Duration};
+use std::{error::Error, fmt::Display, time::Duration};
 
-use sdl2::{EventPump, keyboard::Keycode};
+use sdl2::{
+    EventPump,
+    keyboard::{KeyboardState, Keycode, Scancode as Sc},
+    pixels::Color,
+    rect::Rect,
+    render::Canvas,
+    ttf,
+    video::Window,
+};
 
 use crate::{Game, networking, player_input, render, server, sys};
 
@@ -25,29 +33,82 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
     let ticker = sys::ticker(FRAME_TIME);
 
     let mut movement: (i8, i8) = (0, 0);
+    let mut movement_history: Vec<((i8, i8), usize)> = vec![(movement, 1)];
     let mut running = true;
     while running {
         let tick = ticker.start();
 
         handle_client_inputs(&mut sdl.events, &mut settings, &mut movement, &mut running);
 
+        // Handling of movement history for reconciliation
+        let movement_id = movement_history.last().unwrap_or(&((0, 0), 0)).1 + 1;
+        movement_history.push((movement, movement_id));
+
         let message = crate::Message {
+            id: movement_id,
             x: movement.0,
             y: movement.1,
         };
+
         client.send(&message);
 
+        let mut move_ack_id: usize = 0;
         for bytes in client.recv() {
-            state.shared = serde_json::from_slice(&bytes).unwrap();
+            (state.shared, move_ack_id) = serde_json::from_slice(&bytes).unwrap();
         }
 
-        predict(&mut state, movement);
+        if move_ack_id != 0 {
+            movement_history.retain(|m| m.1 > move_ack_id);
+            if settings.reconciliation {
+                reconcile(&mut state, &movement_history)
+            };
+        }
+
+        if settings.prediction {
+            predict(&mut state, movement)
+        };
         render(&state.shared, &mut sdl.canvas);
+        render_settings(&settings, &mut sdl.canvas);
+        sdl.canvas.present();
 
         tick.wait();
     }
 
     Ok(())
+}
+
+fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
+    for movement in movement_history {
+        // TODO make player_idx not hardcoded
+        state
+            .shared
+            .simple_player_input(state.player_idx, movement.0, DELTA_TIME);
+        state.shared.player_movement(DELTA_TIME);
+    }
+}
+
+fn render_settings(settings: &Settings, canvas: &mut Canvas<Window>) {
+    let ttf_context = ttf::init().unwrap();
+    let font = ttf_context
+        .load_font("assets/MinecraftRegular-Bmg3.otf", 10)
+        .unwrap();
+
+    for (i, text_chunk) in format!("{settings}").split("\n").enumerate() {
+        let surface = font.render(text_chunk).blended(Color::BLACK).unwrap();
+
+        // Create texture from surface
+        let texture_creator = canvas.texture_creator();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .unwrap();
+
+        // Get text dimensions
+        let sdl2::render::TextureQuery { width, height, .. } = texture.query();
+
+        // Render the texture
+        let target = Rect::new(4, 4 + (height * i as u32) as i32, width, height);
+        canvas.copy(&texture, None, Some(target)).unwrap();
+    }
 }
 
 fn handle_client_inputs(
@@ -105,9 +166,20 @@ struct State {
     shared: crate::Game,
 }
 
+#[derive(Debug)]
 struct Settings {
     reconciliation: bool,
     prediction: bool,
     interpolation: bool,
     ping: Duration,
+}
+
+impl Display for Settings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Reconciliation: {}\nInterpolation: {}\nPrediction: {}\nPing: {:?}",
+            self.reconciliation, self.interpolation, self.prediction, self.ping
+        )
+    }
 }

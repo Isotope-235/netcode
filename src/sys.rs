@@ -3,9 +3,9 @@ use std::time::{Duration, Instant};
 use sdl2::render::BlendMode;
 
 const TITLE: &str = "netcode";
-const LOGICAL_WIDTH: u32 = 160;
-const LOGICAL_HEIGHT: u32 = 120;
-const SCALE: u32 = 8;
+const LOGICAL_WIDTH: u32 = 320;
+const LOGICAL_HEIGHT: u32 = 240;
+const SCALE: u32 = 4;
 
 #[allow(dead_code)]
 pub struct SdlContext {
