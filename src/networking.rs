@@ -7,18 +7,19 @@ use std::{
 
 fn spawn_sender(
     socket: net::UdpSocket,
-    tx: mpsc::Sender<(usize, [u8; 2048])>,
+    tx: mpsc::Sender<Box<[u8]>>,
     delay: Duration,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
+        let mut buf = [0, u16::MAX as _];
         loop {
-            let mut buf = [0; 2048];
             match socket.recv(&mut buf) {
                 Ok(read) => {
                     let tx_ref = tx.clone();
                     thread::spawn(move || {
                         thread::sleep(delay);
-                        tx_ref.send((read, buf)).unwrap();
+                        let boxed = Box::from(&buf[..read]);
+                        tx_ref.send(boxed).unwrap();
                     });
                 }
                 Err(e) => eprintln!("recv error: {e}"),
@@ -31,7 +32,7 @@ pub struct Client {
     simulated_ping: Duration,
     socket: net::UdpSocket,
     sending_thread: thread::JoinHandle<()>,
-    receiver: mpsc::Receiver<(usize, [u8; 2048])>,
+    receiver: mpsc::Receiver<Box<[u8]>>,
 }
 
 impl Client {
@@ -58,7 +59,7 @@ impl Client {
         })
     }
 
-    pub fn try_iter(&self) -> TryIter<(usize, [u8; 2048])> {
+    pub fn try_iter(&self) -> TryIter<Box<[u8]>> {
         self.receiver.try_iter()
     }
 
