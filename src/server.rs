@@ -83,9 +83,8 @@ fn handle_server_inputs(events: &mut EventPump, running: &mut bool) {
     for event in events.poll_iter() {
         use sdl2::event::Event as Ev;
 
-        match event {
-            Ev::Quit { .. } => *running = false,
-            _ => (),
+        if let Ev::Quit { .. } = event {
+            *running = false
         }
     }
 }

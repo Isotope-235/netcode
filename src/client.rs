@@ -1,16 +1,10 @@
 use std::{error::Error, fmt::Display, time::Duration};
 
 use sdl2::{
-    EventPump,
-    keyboard::{KeyboardState, Keycode, Scancode as Sc},
-    pixels::Color,
-    rect::Rect,
-    render::Canvas,
-    ttf,
-    video::Window,
+    EventPump, keyboard::Keycode, pixels::Color, rect::Rect, render::Canvas, ttf, video::Window,
 };
 
-use crate::{Game, networking, player_input, render, server, sys};
+use crate::{Game, networking, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
@@ -50,7 +44,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             y: movement.1,
         };
 
-        client.send(&message);
+        client.send(&message)?;
 
         let mut move_ack_id: usize = 0;
         for bytes in client.recv() {
