@@ -22,7 +22,8 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         ping: Duration::from_millis(250),
     };
 
-    let client = networking::Client::connect((server::HOST, server::PORT), settings.ping)?;
+    let client =
+        networking::Client::connect((server::HOST, server::PORT), settings.ping.as_millis() as _)?;
 
     let ticker = sys::ticker(FRAME_TIME);
 

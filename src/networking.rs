@@ -1,14 +1,24 @@
-use std::{io, net, sync::mpsc, thread, time::Duration};
+use std::{
+    io, net,
+    sync::{
+        self, Arc,
+        atomic::{AtomicU64, Ordering},
+        mpsc,
+    },
+    thread,
+    time::Duration,
+};
 
 fn spawn_sender(
     socket: net::UdpSocket,
     tx: mpsc::Sender<Box<[u8]>>,
-    delay: Duration,
+    simulated_ping_ms: Arc<AtomicU64>,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let mut buf = [0; u16::MAX as _];
         loop {
             if let Ok(read) = socket.recv(&mut buf) {
+                let delay = load_delay(&simulated_ping_ms);
                 let tx_ref = tx.clone();
                 thread::spawn(move || {
                     thread::sleep(delay);
@@ -21,8 +31,13 @@ fn spawn_sender(
     })
 }
 
+fn load_delay(ms: &AtomicU64) -> Duration {
+    let delay_ms = ms.load(Ordering::Relaxed) / 2;
+    Duration::from_millis(delay_ms)
+}
+
 pub struct Client {
-    simulated_ping: Duration,
+    simulated_ping_ms: Arc<AtomicU64>,
     socket: net::UdpSocket,
     sending_thread: thread::JoinHandle<()>,
     receiver: mpsc::Receiver<Box<[u8]>>,
@@ -31,7 +46,7 @@ pub struct Client {
 impl Client {
     const PORT: u16 = 0;
 
-    pub fn connect<A>(remote: A, simulated_ping: Duration) -> io::Result<Client>
+    pub fn connect<A>(remote: A, simulated_ping_ms: u64) -> io::Result<Client>
     where
         A: net::ToSocketAddrs,
     {
@@ -39,12 +54,13 @@ impl Client {
         socket.connect(remote)?;
 
         let (tx, receiver) = mpsc::channel();
-
+        let simulated_ping_ms = Arc::new(AtomicU64::new(simulated_ping_ms));
         let socket_ref = socket.try_clone()?;
-        let sending_thread = spawn_sender(socket_ref, tx, simulated_ping / 2);
+
+        let sending_thread = spawn_sender(socket_ref, tx, Arc::clone(&simulated_ping_ms));
 
         Ok(Self {
-            simulated_ping,
+            simulated_ping_ms,
             socket,
             sending_thread,
             receiver,
@@ -58,7 +74,7 @@ impl Client {
     pub fn send(&self, msg: &impl serde::Serialize) -> io::Result<()> {
         let socket = self.socket.try_clone()?;
         let serialized = serde_json::to_vec(msg).unwrap();
-        let delay = self.simulated_ping / 2;
+        let delay = load_delay(&self.simulated_ping_ms);
         thread::spawn(move || {
             thread::sleep(delay);
             let _ = socket.send(&serialized);
