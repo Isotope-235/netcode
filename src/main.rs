@@ -95,6 +95,15 @@ impl Game {
             }],
         }
     }
+
+    fn player_movement(&mut self, dt: f32) {
+        for player in &mut self.players {
+            //player.velocity += GRAVITY * dt.powi(2) / 2.;
+            //player.pos += player.velocity * dt;
+
+            collide(player, &self.platforms);
+        }
+    }
 }
 
 #[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
@@ -124,15 +133,6 @@ fn simple_player_input(game: &mut Game, player_idx: usize, movement: (i8, i8), d
     let target_velocity =
         Vec2::new(movement.0 as _, movement.1 as _).normalize() * PLAYER_TOP_SPEED;
     game.players[player_idx].pos += target_velocity * dt;
-}
-
-fn player_movement(game: &mut Game, dt: f32) {
-    for player in &mut game.players {
-        //player.velocity += GRAVITY * dt.powi(2) / 2.;
-        //player.pos += player.velocity * dt;
-
-        collide(player, &game.platforms);
-    }
 }
 
 fn collide(player: &mut Player, platforms: &Vec<Platform>) {

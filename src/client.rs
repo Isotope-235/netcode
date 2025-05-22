@@ -2,7 +2,7 @@ use std::{error::Error, time::Duration};
 
 use sdl2::{EventPump, keyboard::Keycode};
 
-use crate::{Game, player_input, player_movement, render, server, simple_player_input, sys};
+use crate::{Game, player_input, render, server, simple_player_input, sys};
 
 const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 const PORT: u16 = 0;
@@ -114,7 +114,7 @@ fn handle_client_inputs(
 
 fn predict(state: &mut State, movement: (i8, i8)) {
     simple_player_input(&mut state.shared, state.player_idx, movement, DELTA_TIME);
-    player_movement(&mut state.shared, DELTA_TIME);
+    state.shared.player_movement(DELTA_TIME);
 }
 
 fn send(socket: std::net::UdpSocket, delay: Duration, movement: (i8, i8)) {

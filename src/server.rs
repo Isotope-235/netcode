@@ -38,7 +38,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             crate::simple_player_input(&mut state.shared, 0, movement, crate::client::DELTA_TIME);
         }
 
-        crate::player_movement(&mut state.shared, DELTA_TIME);
+        state.shared.player_movement(DELTA_TIME);
         broadcast(&state, &server)?;
         render(&state.shared, &mut sdl.canvas);
 
