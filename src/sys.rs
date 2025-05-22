@@ -1,7 +1,4 @@
-use std::{
-    ops::Not,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use sdl2::render::BlendMode;
 

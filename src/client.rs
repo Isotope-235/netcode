@@ -1,9 +1,6 @@
 use std::{error::Error, time::Duration};
 
-use sdl2::{
-    EventPump,
-    keyboard::{KeyboardState, Keycode, Scancode as Sc},
-};
+use sdl2::{EventPump, keyboard::Keycode};
 
 use crate::{Game, player_input, player_movement, render, server, simple_player_input, sys};
 
@@ -28,7 +25,26 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
     let client = std::net::UdpSocket::bind((HOST, PORT))?;
     client.connect((server::HOST, server::PORT))?;
-    client.set_nonblocking(true)?;
+
+    // TODO fix this for 250ms++ ping
+    // it only seems to work right under 200ms
+    let (tx, rx) = std::sync::mpsc::channel();
+
+    let client_ref = client.try_clone()?;
+    std::thread::spawn(move || {
+        loop {
+            let mut buf = [0; 2048];
+            let tx_ref = tx.clone();
+            match client_ref.recv(&mut buf) {
+                Ok(read) => {
+                    println!("incoming");
+                    std::thread::sleep(settings.ping / 2);
+                    std::thread::spawn(move || tx_ref.send((read, buf)).unwrap());
+                }
+                Err(e) => eprintln!("recv error: {e}"),
+            }
+        }
+    });
 
     let ticker = sys::ticker(FRAME_TIME);
 
@@ -41,9 +57,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         send(client.try_clone()?, settings.ping / 2, movement);
 
-        let mut buf = [0; 2048];
-        while let Ok(read) = client.recv(&mut buf) {
-            println!("got data: {:?}", &buf[..read]);
+        for (read, buf) in rx.try_iter() {
             state.shared = serde_json::from_slice(&buf[..read]).unwrap();
         }
 
