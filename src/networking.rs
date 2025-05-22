@@ -31,14 +31,13 @@ pub struct Client {
 }
 
 impl Client {
-    const HOST: net::Ipv4Addr = net::Ipv4Addr::new(127, 0, 0, 1);
     const PORT: u16 = 0;
 
     pub fn connect<A>(remote: A, simulated_ping: Duration) -> io::Result<Client>
     where
         A: net::ToSocketAddrs,
     {
-        let socket = net::UdpSocket::bind((Self::HOST, Self::PORT))?;
+        let socket = net::UdpSocket::bind((net::Ipv4Addr::UNSPECIFIED, Self::PORT))?;
         socket.connect(remote)?;
 
         let (tx, receiver) = mpsc::channel();
