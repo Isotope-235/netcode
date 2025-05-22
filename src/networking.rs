@@ -8,17 +8,15 @@ fn spawn_sender(
     thread::spawn(move || {
         let mut buf = [0; u16::MAX as _];
         loop {
-            match socket.recv(&mut buf) {
-                Ok(read) => {
-                    let tx_ref = tx.clone();
-                    thread::spawn(move || {
-                        thread::sleep(delay);
-                        let boxed = Box::from(&buf[..read]);
-                        tx_ref.send(boxed).unwrap();
-                    });
-                }
-                Err(e) => eprintln!("recv error: {e}"),
+            if let Ok(read) = socket.recv(&mut buf) {
+                let tx_ref = tx.clone();
+                thread::spawn(move || {
+                    thread::sleep(delay);
+                    let boxed = Box::from(&buf[..read]);
+                    tx_ref.send(boxed).unwrap();
+                });
             }
+            // if server is not running, busy wait
         }
     })
 }
