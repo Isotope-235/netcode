@@ -6,7 +6,7 @@ fn spawn_sender(
     delay: Duration,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
-        let mut buf = [0, u16::MAX as _];
+        let mut buf = [0; u16::MAX as _];
         loop {
             match socket.recv(&mut buf) {
                 Ok(read) => {
