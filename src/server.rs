@@ -30,30 +30,26 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         let mut buf = [0; 64];
         while let Ok((read, origin)) = server.recv_from(&mut buf) {
-            
             let mut player_idx = state.clients.len();
             for (i, client) in state.clients.iter().enumerate() {
                 if *client == origin {
                     player_idx = i;
                 }
             }
-            
-            
+
             if player_idx >= state.clients.len() {
                 state.clients.push(origin);
                 state.last_acc.push(0);
-                state.shared.players.push(
-                    crate::Player {
-                        pos: crate::Vec2 {
-                            x: (crate::LOGICAL_WIDTH / 2) as _,
-                            y: (crate::LOGICAL_HEIGHT / 2) as _,
-                        },
-                        velocity: crate::Vec2::new(0., 0.),
-                        size: 10.0,
-                    }
-                );
+                state.shared.players.push(crate::Player {
+                    pos: crate::Vec2 {
+                        x: (crate::LOGICAL_WIDTH / 2) as _,
+                        y: (crate::LOGICAL_HEIGHT / 2) as _,
+                    },
+                    velocity: crate::Vec2::new(0., 0.),
+                    size: 10.0,
+                });
             }
-            
+
             let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
 

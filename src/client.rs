@@ -22,8 +22,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         ping_ms: 250,
     };
 
-    let client =
-        networking::Client::connect((server::HOST, server::PORT), settings.ping_ms)?;
+    let client = networking::Client::connect((server::HOST, server::PORT), settings.ping_ms)?;
 
     let ticker = sys::ticker(FRAME_TIME);
 
@@ -179,7 +178,10 @@ impl Display for Settings {
         write!(
             f,
             "Reconciliation: {}\nInterpolation: {}\nPrediction: {}\nPing: {:?}",
-            self.reconciliation, self.interpolation, self.prediction, Duration::from_millis(self.ping_ms)
+            self.reconciliation,
+            self.interpolation,
+            self.prediction,
+            Duration::from_millis(self.ping_ms)
         )
     }
 }
