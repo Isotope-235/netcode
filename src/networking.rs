@@ -1,7 +1,7 @@
 use std::{
     io, net,
     sync::{
-        self, Arc,
+        Arc,
         atomic::{AtomicU64, Ordering},
         mpsc,
     },
