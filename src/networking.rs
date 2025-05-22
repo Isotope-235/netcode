@@ -1,9 +1,4 @@
-use std::{
-    io, net,
-    sync::mpsc::{self, TryIter},
-    thread,
-    time::Duration,
-};
+use std::{io, net, sync::mpsc, thread, time::Duration};
 
 fn spawn_sender(
     socket: net::UdpSocket,
@@ -59,7 +54,7 @@ impl Client {
         })
     }
 
-    pub fn try_iter(&self) -> TryIter<Box<[u8]>> {
+    pub fn try_iter(&self) -> mpsc::TryIter<Box<[u8]>> {
         self.receiver.try_iter()
     }
 
