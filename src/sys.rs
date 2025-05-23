@@ -6,6 +6,8 @@ const TITLE: &str = "netcode";
 const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
 const SCALE: u32 = 4;
+const INT_SCALE: bool = true;
+const BLEND_MODE: BlendMode = BlendMode::None;
 
 pub struct SdlContext {
     pub events: sdl2::EventPump,
@@ -23,8 +25,8 @@ pub fn init_sdl_systems(
         .build()?;
     let mut canvas = window.into_canvas().build()?;
     canvas.set_logical_size(LOGICAL_WIDTH, LOGICAL_HEIGHT)?;
-    canvas.set_integer_scale(true)?;
-    canvas.set_blend_mode(BlendMode::None);
+    canvas.set_integer_scale(INT_SCALE)?;
+    canvas.set_blend_mode(BLEND_MODE);
 
     let texture_creator = canvas.texture_creator();
 
