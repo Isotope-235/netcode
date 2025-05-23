@@ -13,7 +13,11 @@ use crate::{Game, ServerResponse, networking, render, server, sys};
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
-pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
+pub fn run(
+    mut sdl: sys::SdlContext,
+    font: sdl2::ttf::Font,
+    shared: Game,
+) -> Result<(), Box<dyn Error>> {
     let mut state = State {
         player_idx: None,
         shared,
@@ -93,7 +97,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         }
 
         render(&state.shared, &mut sdl.canvas);
-        render_settings(&settings, &mut sdl.canvas);
+        render_settings(&font, &settings, &mut sdl.canvas);
         sdl.canvas.present();
 
         tick.wait();
@@ -130,12 +134,7 @@ fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
     }
 }
 
-fn render_settings(settings: &Settings, canvas: &mut Canvas<Window>) {
-    let ttf_context = ttf::init().unwrap();
-    let font = ttf_context
-        .load_font("assets/MinecraftRegular-Bmg3.otf", 10)
-        .unwrap();
-
+fn render_settings(font: &sdl2::ttf::Font, settings: &Settings, canvas: &mut Canvas<Window>) {
     for (i, text_chunk) in format!("{settings}").split("\n").enumerate() {
         let surface = font.render(text_chunk).blended(Color::BLACK).unwrap();
 

@@ -39,12 +39,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     dbg!(&mode);
 
     let sdl = sys::init_sdl()?;
+    let ttf = sdl2::ttf::init()?;
+    let font = ttf.load_font("assets/MinecraftRegular-Bmg3.otf", 10)?;
+
     let shared_state = Game::new();
 
     #[allow(clippy::wildcard_in_or_patterns)]
     match &mode[..] {
         "server" | "--server" => server::run(sdl, shared_state),
-        "client" | "--client" | _ => client::run(sdl, shared_state),
+        "client" | "--client" | _ => client::run(sdl, font, shared_state),
     }
 }
 
