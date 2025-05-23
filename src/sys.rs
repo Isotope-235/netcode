@@ -1,13 +1,11 @@
 use std::time::{Duration, Instant};
 
-use sdl2::render::BlendMode;
-
 const TITLE: &str = "netcode";
 const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
 const SCALE: u32 = 4;
 const INT_SCALE: bool = true;
-const BLEND_MODE: BlendMode = BlendMode::None;
+const BLEND_MODE: sdl2::render::BlendMode = sdl2::render::BlendMode::None;
 
 pub struct SdlContext {
     pub events: sdl2::EventPump,
