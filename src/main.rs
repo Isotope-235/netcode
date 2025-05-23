@@ -22,6 +22,8 @@ const PLAYER_TOP_SPEED: f32 = 100.;
 const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
 const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
 
+const FONT_PATH: &str = "assets/MinecraftRegular-Bmg3.otf";
+const FONT_SIZE: u16 = 10;
 const PLAYER_COLORS: &[Color] = &[
     Color::RED,
     Color::BLUE,
@@ -40,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let sdl = sys::init_sdl()?;
     let ttf = sdl2::ttf::init()?;
-    let font = ttf.load_font("assets/MinecraftRegular-Bmg3.otf", 10)?;
+    let font = ttf.load_font(FONT_PATH, FONT_SIZE)?;
 
     let shared_state = Game::new();
 
