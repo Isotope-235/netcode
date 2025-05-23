@@ -13,6 +13,7 @@ pub struct SdlContext {
     video: sdl2::VideoSubsystem,
     pub events: sdl2::EventPump,
     pub canvas: sdl2::render::WindowCanvas,
+    pub texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext>,
 }
 
 pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
@@ -27,11 +28,14 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
     canvas.set_integer_scale(true)?;
     canvas.set_blend_mode(BlendMode::None);
 
+    let texture_creator = canvas.texture_creator();
+
     Ok(SdlContext {
         sdl,
         video,
         events,
         canvas,
+        texture_creator,
     })
 }
 

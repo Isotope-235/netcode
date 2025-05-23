@@ -4,9 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use sdl2::{
-    EventPump, keyboard::Keycode, pixels::Color, rect::Rect, render::Canvas, ttf, video::Window,
-};
+use sdl2::{EventPump, keyboard::Keycode, pixels::Color, rect::Rect};
 
 use crate::{Game, ServerResponse, networking, render, server, sys};
 
@@ -97,7 +95,7 @@ pub fn run(
         }
 
         render(&state.shared, &mut sdl.canvas);
-        render_settings(&font, &settings, &mut sdl.canvas);
+        render_settings(&font, &settings, &mut sdl);
         sdl.canvas.present();
 
         tick.wait();
@@ -134,22 +132,19 @@ fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
     }
 }
 
-fn render_settings(font: &sdl2::ttf::Font, settings: &Settings, canvas: &mut Canvas<Window>) {
-    for (i, text_chunk) in format!("{settings}").split("\n").enumerate() {
+fn render_settings(font: &sdl2::ttf::Font, settings: &Settings, sdl: &mut sys::SdlContext) {
+    for (i, text_chunk) in settings.to_string().lines().enumerate() {
         let surface = font.render(text_chunk).blended(Color::BLACK).unwrap();
 
-        // Create texture from surface
-        let texture_creator = canvas.texture_creator();
-        let texture = texture_creator
+        let texture = sdl
+            .texture_creator
             .create_texture_from_surface(&surface)
             .unwrap();
 
-        // Get text dimensions
         let sdl2::render::TextureQuery { width, height, .. } = texture.query();
 
-        // Render the texture
         let target = Rect::new(4, 4 + (height * i as u32) as i32, width, height);
-        canvas.copy(&texture, None, Some(target)).unwrap();
+        sdl.canvas.copy(&texture, None, Some(target)).unwrap();
     }
 }
 
