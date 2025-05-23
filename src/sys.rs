@@ -7,18 +7,16 @@ const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
 const SCALE: u32 = 4;
 
-#[allow(dead_code)]
 pub struct SdlContext {
-    sdl: sdl2::Sdl,
-    video: sdl2::VideoSubsystem,
     pub events: sdl2::EventPump,
     pub canvas: sdl2::render::WindowCanvas,
     pub texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext>,
 }
 
-pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
-    let sdl = sdl2::init()?;
-    let video = sdl.video()?;
+pub fn init_sdl_systems(
+    sdl: &sdl2::Sdl,
+    video: &sdl2::VideoSubsystem,
+) -> Result<SdlContext, Box<dyn std::error::Error>> {
     let events = sdl.event_pump()?;
     let window = video
         .window(TITLE, LOGICAL_WIDTH * SCALE, LOGICAL_HEIGHT * SCALE)
@@ -31,8 +29,6 @@ pub fn init_sdl() -> Result<SdlContext, Box<dyn std::error::Error>> {
     let texture_creator = canvas.texture_creator();
 
     Ok(SdlContext {
-        sdl,
-        video,
         events,
         canvas,
         texture_creator,
