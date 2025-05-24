@@ -253,7 +253,7 @@ fn fix_position(player: &mut Player, platform: &Platform) {
     );
 
     // Check which position is closest to the players actual location and use that one
-    player.pos = if (player.pos - y_corrected).len() < (player.pos - x_corrected).len() {
+    player.pos = if player.pos.dist(y_corrected) < player.pos.dist(x_corrected) {
         if player_relative_posistion.y < 0. {
             player.state = PlayerState::Grounded
         }

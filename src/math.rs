@@ -64,4 +64,8 @@ impl Vec2 {
     pub fn len(self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
+
+    pub fn dist(self, rhs: Vec2) -> f32 {
+        (self - rhs).len()
+    }
 }
