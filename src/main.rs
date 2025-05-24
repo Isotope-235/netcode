@@ -17,6 +17,10 @@ mod sys;
 
 const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
+const WIDTH_F32: f32 = LOGICAL_WIDTH as _;
+const HEIGHT_F32: f32 = LOGICAL_HEIGHT as _;
+const HALF_WIDTH: f32 = WIDTH_F32 / 2.;
+const HALF_HEIGHT: f32 = HEIGHT_F32 / 2.;
 
 const PLAYER_TOP_SPEED: f32 = 100.;
 const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 10.;
@@ -114,19 +118,19 @@ impl Game {
             platforms: vec![
                 Platform {
                     size: (120., 30.),
-                    pos: Vec2::new((LOGICAL_WIDTH / 2) as _, 50. + (LOGICAL_HEIGHT / 2) as f32),
+                    pos: Vec2::new(HALF_WIDTH, 50. + HALF_HEIGHT),
                 },
                 Platform {
-                    size: (LOGICAL_WIDTH as _, 30.),
-                    pos: Vec2::new((LOGICAL_WIDTH / 2) as _, LOGICAL_HEIGHT as _),
+                    size: (WIDTH_F32, 30.),
+                    pos: Vec2::new(HALF_WIDTH, HEIGHT_F32),
                 },
                 Platform {
-                    size: (30., LOGICAL_HEIGHT as _),
-                    pos: Vec2::new(0., (LOGICAL_HEIGHT / 2) as _),
+                    size: (30., HEIGHT_F32),
+                    pos: Vec2::new(0., HALF_HEIGHT),
                 },
                 Platform {
-                    size: (30., LOGICAL_HEIGHT as _),
-                    pos: Vec2::new(LOGICAL_WIDTH as _, (LOGICAL_HEIGHT / 2) as _),
+                    size: (30., HEIGHT_F32),
+                    pos: Vec2::new(WIDTH_F32, HALF_HEIGHT),
                 },
             ],
         }
