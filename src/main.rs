@@ -19,8 +19,9 @@ const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
 
 const PLAYER_TOP_SPEED: f32 = 100.;
-const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 5.;
-const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 };
+const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 10.;
+const JUMP_SPEED: f32 = 100.;
+const GRAVITY: Vec2 = Vec2 { x: 0., y: 9.81 * 20. };
 
 const FONT_PATH: &str = "assets/MinecraftRegular-Bmg3.otf";
 const FONT_SIZE: u16 = 10;
@@ -107,37 +108,67 @@ impl Game {
     fn new() -> Self {
         Self {
             players: vec![],
-            platforms: vec![Platform {
-                size: (60., 20.),
-                pos: Vec2::new((LOGICAL_WIDTH / 2) as _, (LOGICAL_HEIGHT / 2 + 30) as _),
-            }],
+            platforms: vec![
+                Platform {
+                    size: (120., 30.),
+                    pos: Vec2::new((LOGICAL_WIDTH / 2) as _, 50. + (LOGICAL_HEIGHT / 2) as f32), 
+                },
+                Platform {
+                    size: (LOGICAL_WIDTH as _, 30.),
+                    pos: Vec2::new((LOGICAL_WIDTH / 2) as _, LOGICAL_HEIGHT as _), 
+                },
+                Platform {
+                    size: (30., LOGICAL_HEIGHT as _),
+                    pos: Vec2::new(0., (LOGICAL_HEIGHT / 2) as _)
+                },
+                Platform {
+                    size: (30., LOGICAL_HEIGHT as _),
+                    pos: Vec2::new(LOGICAL_WIDTH as _, (LOGICAL_HEIGHT / 2) as _)
+                }
+            ],
         }
     }
 
     fn player_movement(&mut self, dt: f32) {
         for player in &mut self.players {
-            // player.velocity += GRAVITY * dt;
-            // player.pos += player.velocity * dt;
+            player.velocity += GRAVITY * dt;
+            player.pos += player.velocity * dt;
 
             collide(player, &self.platforms);
         }
     }
 
-    fn simple_player_input(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
+    fn simple_player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
         let target_velocity =
             Vec2::new(movement.0 as _, movement.1 as _).normalize() * PLAYER_TOP_SPEED;
         self.players[player_idx].pos += target_velocity * dt;
     }
 
-    fn player_input(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
-        let current_velocity = self.players[player_idx].velocity;
-        let target_velocity =
-            Vec2::new(movement.0 as f32, movement.1 as f32).normalize() * PLAYER_TOP_SPEED;
+    fn player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
+        let current_velocity = self.players[player_idx].velocity.x;
+        let target_velocity = movement.0 as f32 * PLAYER_TOP_SPEED;
         let velocity_diff = target_velocity - current_velocity;
-        let delta_v = (PLAYER_ACCELERATION * dt).min(velocity_diff.len());
+        let acc = PLAYER_ACCELERATION * movement.0 as f32 * dt;
+        let delta_v = if acc.abs() < velocity_diff.abs() {
+            acc
+        } else { velocity_diff };
 
-        self.players[player_idx].velocity =
-            current_velocity + (velocity_diff.normalize() * delta_v);
+        self.players[player_idx].velocity.x =
+            current_velocity + delta_v;
+        
+        if movement.1 == -1 {
+            match self.players[player_idx].state {
+                PlayerState::Grounded => {
+                    self.players[player_idx].velocity.y -= JUMP_SPEED;
+                },
+                PlayerState::WallBound(direction) => {
+                    self.players[player_idx].velocity.y = - JUMP_SPEED;
+                    self.players[player_idx].velocity.x -= direction as f32 * JUMP_SPEED * 1.5;
+                    
+                },
+                PlayerState::Airborne => ()
+            }
+        }
     }
 }
 
@@ -152,10 +183,20 @@ struct Player {
     pos: Vec2,
     velocity: Vec2,
     size: f32,
+    state: PlayerState
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone)]
+enum PlayerState {
+    // Direction of hit wall
+    WallBound(i8),
+    Grounded,
+    Airborne
 }
 
 fn collide(player: &mut Player, platforms: &Vec<Platform>) {
     let mut collided = true;
+    player.state = PlayerState::Airborne;
     while collided {
         collided = false;
         for platform in platforms {
@@ -198,9 +239,12 @@ fn fix_position(player: &mut Player, platform: &Platform) {
 
     // Check which position is closest to the players actual location and use that one
     player.pos = if (player.pos - y_corrected).len() < (player.pos - x_corrected).len() {
+        if player_relative_posistion.y < 0. { player.state = PlayerState::Grounded }
         player.velocity.y = 0.;
         y_corrected
     } else {
+        let wall_direction = if player_relative_posistion.x < 0. {1} else {-1};
+        player.state = PlayerState::WallBound(wall_direction);
         player.velocity.x = 0.;
         x_corrected
     };

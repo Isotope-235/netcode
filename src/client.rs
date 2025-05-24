@@ -126,7 +126,7 @@ fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
         if let Some(player_idx) = state.player_idx {
             state
                 .shared
-                .simple_player_input(player_idx, movement.0, DELTA_TIME);
+                .player_physics(player_idx, movement.0, DELTA_TIME);
         }
         state.shared.player_movement(DELTA_TIME);
     }
@@ -143,7 +143,7 @@ fn render_settings(font: &sdl2::ttf::Font, settings: &Settings, sdl: &mut sys::S
 
         let sdl2::render::TextureQuery { width, height, .. } = texture.query();
 
-        let target = Rect::new(4, 4 + (height * i as u32) as i32, width, height);
+        let target = Rect::new(20, 4 + (height * i as u32) as i32, width, height);
         sdl.canvas.copy(&texture, None, Some(target)).unwrap();
     }
 }
@@ -204,7 +204,7 @@ fn predict(state: &mut State, movement: (i8, i8)) {
     if let Some(player_idx) = state.player_idx {
         state
             .shared
-            .simple_player_input(player_idx, movement, DELTA_TIME);
+            .player_physics(player_idx, movement, DELTA_TIME);
     }
     state.shared.player_movement(DELTA_TIME);
 }

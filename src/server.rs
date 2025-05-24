@@ -7,7 +7,7 @@ use crate::{Game, ServerResponse, render, sys};
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
 
-const FRAME_TIME: Duration = Duration::from_millis(200);
+const FRAME_TIME: Duration = Duration::from_millis(10);
 const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
@@ -47,6 +47,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
                     },
                     velocity: crate::Vec2::new(0., 0.),
                     size: 10.0,
+                    state: crate::PlayerState::Airborne
                 });
             }
 
@@ -56,7 +57,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
             state.last_acc[player_idx] = message.id;
             state
                 .shared
-                .simple_player_input(player_idx, movement, crate::client::DELTA_TIME);
+                .player_physics(player_idx, movement, crate::client::DELTA_TIME);
         }
 
         state.shared.player_movement(DELTA_TIME);
