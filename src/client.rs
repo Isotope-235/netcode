@@ -128,7 +128,6 @@ fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
                 .shared
                 .player_physics(player_idx, movement.0, DELTA_TIME);
         }
-        state.shared.player_movement(DELTA_TIME);
     }
 }
 
@@ -206,7 +205,6 @@ fn predict(state: &mut State, movement: (i8, i8)) {
             .shared
             .player_physics(player_idx, movement, DELTA_TIME);
     }
-    state.shared.player_movement(DELTA_TIME);
 }
 
 struct State {
