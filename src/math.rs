@@ -48,7 +48,9 @@ impl Mul for Vec2 {
 }
 
 impl Vec2 {
-    pub fn new(x: f64, y: f64) -> Self {
+    pub const NULL: Self = Vec2::new(0., 0.);
+
+    pub const fn new(x: f64, y: f64) -> Self {
         Vec2 { x, y }
     }
 

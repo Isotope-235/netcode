@@ -117,6 +117,18 @@ pub struct Player {
 }
 
 impl Player {
+    pub fn new() -> Self {
+        Self {
+            pos: Vec2 {
+                x: HALF_WIDTH,
+                y: HALF_HEIGHT,
+            },
+            velocity: Vec2::NULL,
+            size: 10.0,
+            state: PlayerState::Airborne,
+        }
+    }
+
     fn dimensions(&self) -> Vec2 {
         let rad = self.size * 0.5;
         Vec2::new(rad, rad)

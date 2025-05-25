@@ -2,7 +2,7 @@ use std::{error::Error, io, net::UdpSocket, time::Duration};
 
 use sdl2::EventPump;
 
-use crate::{Vec2, model::*, render, sys};
+use crate::{model::*, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
@@ -48,15 +48,7 @@ pub fn run(
             if player_idx >= state.clients.len() {
                 state.clients.push(origin);
                 state.last_acc.push(0);
-                state.shared.players.push(Player {
-                    pos: Vec2 {
-                        x: (LOGICAL_WIDTH / 2) as _,
-                        y: (LOGICAL_HEIGHT / 2) as _,
-                    },
-                    velocity: Vec2::new(0., 0.),
-                    size: 10.0,
-                    state: PlayerState::Airborne,
-                });
+                state.shared.players.push(Player::new());
             }
 
             let message: Message = serde_json::from_slice(&buf[..read]).unwrap();

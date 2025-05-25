@@ -1,7 +1,5 @@
 use std::error::Error;
 
-use math::Vec2;
-
 mod client;
 mod math;
 mod model;
