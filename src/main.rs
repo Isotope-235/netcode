@@ -148,6 +148,21 @@ struct Player {
     state: PlayerState,
 }
 
+impl Player {
+    fn dimensions(&self) -> Vec2 {
+        let rad = self.size * 0.5;
+        Vec2::new(rad, rad)
+    }
+
+    fn top_left(&self) -> Vec2 {
+        self.pos - self.dimensions()
+    }
+
+    fn bottom_right(&self) -> Vec2 {
+        self.pos + self.dimensions()
+    }
+}
+
 #[derive(serde::Deserialize, serde::Serialize, Clone)]
 enum PlayerState {
     // Direction of hit wall
@@ -162,10 +177,13 @@ fn collide(player: &mut Player, platforms: &Vec<Platform>) {
     while collided {
         collided = false;
         for platform in platforms {
-            if platform.pos.x + platform.size.0 / 2. > player.pos.x - (player.size / 2.)
-                && platform.pos.x - platform.size.0 / 2. < player.pos.x + (player.size / 2.)
-                && platform.pos.y + platform.size.1 / 2. > player.pos.y - (player.size / 2.)
-                && platform.pos.y - platform.size.1 / 2. < player.pos.y + (player.size / 2.)
+            let topleft = player.top_left();
+            let botright = player.bottom_right();
+
+            if platform.pos.x + platform.size.0 / 2. > topleft.x
+                && platform.pos.x - platform.size.0 / 2. < botright.x
+                && platform.pos.y + platform.size.1 / 2. > topleft.y
+                && platform.pos.y - platform.size.1 / 2. < botright.y
             {
                 collided = true;
                 fix_position(player, platform);
