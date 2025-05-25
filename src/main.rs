@@ -112,7 +112,7 @@ struct Game {
 impl Game {
     fn new() -> Self {
         Self {
-            players: vec![],
+            players: Vec::new(),
             platforms: vec![
                 Platform {
                     size: (120., 30.),

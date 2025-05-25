@@ -12,7 +12,7 @@ const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {
-        last_acc: vec![],
+        last_acc: Vec::new(),
         clients: Vec::new(),
         shared,
     };

@@ -35,8 +35,8 @@ pub fn run(
     let mut movement: (i8, i8) = (0, 0);
     let mut movement_history: Vec<((i8, i8), usize)> = vec![(movement, 1)];
 
-    let mut players_prev = vec![];
-    let mut players_current = vec![];
+    let mut players_prev = Vec::new();
+    let mut players_current = Vec::new();
     let mut server_frame_time = Duration::from_millis(100); // initial guess, this gets changed
     let mut server_timestamp = Instant::now();
 
