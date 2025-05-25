@@ -121,7 +121,7 @@ fn interpolate(
     }
 }
 
-fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
+fn reconcile(state: &mut State, movement_history: &[((i8, i8), usize)]) {
     for movement in movement_history {
         if let Some(player_idx) = state.player_idx {
             state

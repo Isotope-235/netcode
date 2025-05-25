@@ -171,7 +171,7 @@ enum PlayerState {
     Airborne,
 }
 
-fn collide(player: &mut Player, platforms: &Vec<Platform>) {
+fn collide(player: &mut Player, platforms: &[Platform]) {
     let mut collided = true;
     player.state = PlayerState::Airborne;
     while collided {
