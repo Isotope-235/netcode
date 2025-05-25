@@ -7,6 +7,9 @@ const SCALE: u32 = 4;
 const INT_SCALE: bool = true;
 const BLEND_MODE: sdl2::render::BlendMode = sdl2::render::BlendMode::None;
 
+const FONT_PATH: &str = "assets/minecraft.otf";
+const FONT_SIZE: u16 = 10;
+
 pub struct SdlContext {
     pub events: sdl2::EventPump,
     pub canvas: sdl2::render::WindowCanvas,
@@ -33,6 +36,10 @@ pub fn init_sdl_systems(
         canvas,
         texture_creator,
     })
+}
+
+pub fn load_font(ttf: &sdl2::ttf::Sdl2TtfContext) -> Result<sdl2::ttf::Font<'_, 'static>, String> {
+    ttf.load_font(FONT_PATH, FONT_SIZE)
 }
 
 #[derive(Clone, Copy)]

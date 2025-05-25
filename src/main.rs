@@ -24,9 +24,6 @@ const GRAVITY: Vec2 = Vec2 {
     y: 9.81 * 20.,
 };
 
-const FONT_PATH: &str = "assets/minecraft.otf";
-const FONT_SIZE: u16 = 10;
-
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args();
 
@@ -36,7 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let video = sdl.video()?;
     let ctx = sys::init_sdl_systems(&sdl, &video)?;
     let ttf = sdl2::ttf::init()?;
-    let font = ttf.load_font(FONT_PATH, FONT_SIZE)?;
+    let font = sys::load_font(&ttf)?;
 
     let shared_state = Game::new();
 
