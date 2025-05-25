@@ -59,7 +59,7 @@ pub fn run(
 
         client.send(&message)?;
 
-        let mut move_ack_id: usize = 0;
+        let mut move_ack_id = 0;
         for bytes in client.recv() {
             let server_response: ServerResponse = serde_json::from_slice(&bytes).unwrap();
             state.player_idx = Some(server_response.player_idx);
