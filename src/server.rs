@@ -7,6 +7,7 @@ use crate::{Game, ServerResponse, render, sys};
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
 
+const DEFAULT_TICKRATE: usize = 4;
 const FRAME_TIME: Duration = Duration::from_millis(200);
 const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
@@ -17,16 +18,20 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
         shared,
     };
 
+    let mut tickrate = DEFAULT_TICKRATE;
+
     let server = std::net::UdpSocket::bind((HOST, PORT))?;
     server.set_nonblocking(true)?;
 
-    let ticker = sys::ticker(FRAME_TIME);
+    let mut ticker = sys::ticker(FRAME_TIME);
 
     let mut running = true;
     while running {
         let tick = ticker.start();
 
-        handle_server_inputs(&mut sdl.events, &mut running);
+        handle_server_inputs(&mut sdl.events, &mut running, &mut tickrate);
+        let frame_time = Duration::from_secs_f64((tickrate as f64).recip());
+        ticker = sys::ticker(frame_time);
 
         let mut buf = [0; 64];
         while let Ok((read, origin)) = server.recv_from(&mut buf) {
@@ -99,12 +104,20 @@ fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     Ok(())
 }
 
-fn handle_server_inputs(events: &mut EventPump, running: &mut bool) {
+fn handle_server_inputs(events: &mut EventPump, running: &mut bool, tickrate: &mut usize) {
     for event in events.poll_iter() {
-        use sdl2::event::Event as Ev;
+        use sdl2::{event::Event as Ev, keyboard::Keycode as Kc};
 
-        if let Ev::Quit { .. } = event {
-            *running = false
+        match event {
+            Ev::Quit { .. } => *running = false,
+            Ev::KeyDown {
+                keycode: Some(kc), ..
+            } => match kc {
+                Kc::Plus => *tickrate += 1,
+                Kc::Minus => *tickrate = (*tickrate - 1).max(1),
+                _ => (),
+            },
+            _ => (),
         }
     }
 }
