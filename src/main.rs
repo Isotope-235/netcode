@@ -46,8 +46,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mode = args.nth(1).unwrap_or_default();
 
-    dbg!(&mode);
-
     let sdl = sdl2::init()?;
     let video = sdl.video()?;
     let ctx = sys::init_sdl_systems(&sdl, &video)?;
