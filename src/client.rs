@@ -94,7 +94,7 @@ pub fn run(
             );
         }
 
-        render(&state.shared, &mut sdl.canvas);
+        render::game(&state.shared, &mut sdl.canvas);
         render_settings(font, &settings, &mut sdl);
         sdl.canvas.present();
 

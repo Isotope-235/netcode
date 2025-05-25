@@ -1,17 +1,11 @@
 use std::error::Error;
 
-use sdl2::{
-    pixels::Color,
-    rect::{Point, Rect},
-    render::Canvas,
-    video::Window,
-};
-
 use math::Vec2;
 
 mod client;
 mod math;
 mod networking;
+mod render;
 mod server;
 mod sys;
 
@@ -32,14 +26,6 @@ const GRAVITY: Vec2 = Vec2 {
 
 const FONT_PATH: &str = "assets/MinecraftRegular-Bmg3.otf";
 const FONT_SIZE: u16 = 10;
-const PLAYER_COLORS: &[Color] = &[
-    Color::RED,
-    Color::BLUE,
-    Color::MAGENTA,
-    Color::GREEN,
-    Color::YELLOW,
-    Color::CYAN,
-];
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args();
@@ -58,34 +44,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     match &mode[..] {
         "server" | "--server" => server::run(ctx, &font, shared_state),
         "client" | "--client" | _ => client::run(ctx, &font, shared_state),
-    }
-}
-
-fn render(game: &Game, canvas: &mut Canvas<Window>) {
-    canvas.set_draw_color(Color::WHITE);
-    canvas.clear();
-
-    canvas.set_draw_color(Color::BLACK);
-    for platform in &game.platforms {
-        let r = Rect::from_center(
-            Point::new(platform.pos.x as _, platform.pos.y as _),
-            platform.size.0 as _,
-            platform.size.1 as _,
-        );
-        let _ = canvas.fill_rect(r);
-    }
-
-    for (i, player) in game.players.iter().enumerate() {
-        if i >= PLAYER_COLORS.len() {
-            panic!("Not enough colors :(");
-        }
-        canvas.set_draw_color(PLAYER_COLORS[i]);
-        let r = Rect::from_center(
-            Point::new(player.pos.x as _, player.pos.y as _),
-            player.size as _,
-            player.size as _,
-        );
-        let _ = canvas.fill_rect(r);
     }
 }
 

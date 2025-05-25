@@ -70,7 +70,7 @@ pub fn run(
         }
 
         broadcast(&state, &server)?;
-        render(&state.shared, &mut sdl.canvas);
+        render::game(&state.shared, &mut sdl.canvas);
         render_settings(font, tickrate, &mut sdl);
         sdl.canvas.present();
 
