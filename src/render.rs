@@ -3,7 +3,7 @@ use sdl2::{
     rect::{Point, Rect},
 };
 
-use crate::{Game, math::Vec2, sys};
+use crate::{math::Vec2, model::*, sys};
 
 const BG: Color = Color::WHITE;
 const PLATFORM: Color = Color::BLACK;

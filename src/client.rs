@@ -6,7 +6,7 @@ use std::{
 
 use sdl2::{EventPump, keyboard::Keycode};
 
-use crate::{Game, ServerResponse, networking, render, server, sys};
+use crate::{model::*, networking, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
 pub const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
@@ -51,7 +51,7 @@ pub fn run(
         let movement_id = movement_history.last().unwrap_or(&((0, 0), 0)).1 + 1;
         movement_history.push((movement, movement_id));
 
-        let message = crate::Message {
+        let message = Message {
             id: movement_id,
             x: movement.0,
             y: movement.1,
@@ -106,8 +106,8 @@ pub fn run(
 
 fn interpolate(
     state: &mut State,
-    players_prev: &[crate::Player],
-    players_current: &[crate::Player],
+    players_prev: &[Player],
+    players_current: &[Player],
     interpolation_float: f64,
 ) {
     let player_idx = state.player_idx.unwrap_or(players_prev.len());
@@ -193,7 +193,7 @@ fn predict(state: &mut State, movement: (i8, i8)) {
 
 struct State {
     player_idx: Option<usize>,
-    shared: crate::Game,
+    shared: Game,
 }
 
 #[derive(Debug)]

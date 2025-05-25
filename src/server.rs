@@ -2,7 +2,7 @@ use std::{error::Error, io, net::UdpSocket, time::Duration};
 
 use sdl2::EventPump;
 
-use crate::{Game, ServerResponse, render, sys};
+use crate::{Vec2, model::*, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
@@ -48,18 +48,18 @@ pub fn run(
             if player_idx >= state.clients.len() {
                 state.clients.push(origin);
                 state.last_acc.push(0);
-                state.shared.players.push(crate::Player {
-                    pos: crate::Vec2 {
-                        x: (crate::LOGICAL_WIDTH / 2) as _,
-                        y: (crate::LOGICAL_HEIGHT / 2) as _,
+                state.shared.players.push(Player {
+                    pos: Vec2 {
+                        x: (LOGICAL_WIDTH / 2) as _,
+                        y: (LOGICAL_HEIGHT / 2) as _,
                     },
-                    velocity: crate::Vec2::new(0., 0.),
+                    velocity: Vec2::new(0., 0.),
                     size: 10.0,
-                    state: crate::PlayerState::Airborne,
+                    state: PlayerState::Airborne,
                 });
             }
 
-            let message = serde_json::from_slice::<crate::Message>(&buf[..read]).unwrap();
+            let message: Message = serde_json::from_slice(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
 
             state.last_acc[player_idx] = message.id;
@@ -83,13 +83,13 @@ pub fn run(
 struct State {
     last_acc: Vec<usize>,
     clients: Vec<std::net::SocketAddr>,
-    shared: crate::Game,
+    shared: Game,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct AckMessage {
     last_acc: usize,
-    game: crate::Game,
+    game: Game,
 }
 
 #[allow(dead_code)]
