@@ -24,7 +24,7 @@ const GRAVITY: Vec2 = Vec2 {
     y: 9.81 * 20.,
 };
 
-const FONT_PATH: &str = "assets/MinecraftRegular-Bmg3.otf";
+const FONT_PATH: &str = "assets/minecraft.otf";
 const FONT_SIZE: u16 = 10;
 
 fn main() -> Result<(), Box<dyn Error>> {
