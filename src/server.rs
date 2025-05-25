@@ -9,7 +9,6 @@ pub const PORT: u16 = 7878;
 
 const DEFAULT_TICKRATE: usize = 4;
 const FRAME_TIME: Duration = Duration::from_millis(200);
-const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
 pub fn run(
     mut sdl: sys::SdlContext,

@@ -92,15 +92,6 @@ impl Game {
         }
     }
 
-    fn simple_player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f64) {
-        let player = &mut self.players[player_idx];
-        let target_velocity =
-            Vec2::new(movement.0 as _, movement.1 as _).normalize() * PLAYER_TOP_SPEED;
-        player.pos += target_velocity * dt;
-
-        collide(player, &self.platforms);
-    }
-
     fn player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f64) {
         let player = &mut self.players[player_idx];
         let current_velocity = player.velocity.x;

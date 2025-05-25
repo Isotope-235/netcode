@@ -52,15 +52,6 @@ impl Vec2 {
         Vec2 { x, y }
     }
 
-    pub fn normalize(self) -> Self {
-        let len = self.len();
-        if len.abs() > 1e-10 {
-            self * (1. / len)
-        } else {
-            self
-        }
-    }
-
     pub fn len(self) -> f64 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
