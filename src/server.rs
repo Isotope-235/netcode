@@ -8,7 +8,7 @@ pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
 
 const FRAME_TIME: Duration = Duration::from_millis(200);
-const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
+const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
 pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
     let mut state = State {

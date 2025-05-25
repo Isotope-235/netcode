@@ -9,7 +9,7 @@ use sdl2::{EventPump, keyboard::Keycode, pixels::Color, rect::Rect};
 use crate::{Game, ServerResponse, networking, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
-pub const DELTA_TIME: f32 = FRAME_TIME.as_secs_f32();
+pub const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
 pub fn run(
     mut sdl: sys::SdlContext,
@@ -83,8 +83,8 @@ pub fn run(
         };
 
         if settings.interpolation {
-            let interpolation_float = (server_timestamp.elapsed().as_secs_f32()
-                / server_frame_time.as_secs_f32())
+            let interpolation_float = (server_timestamp.elapsed().as_secs_f64()
+                / server_frame_time.as_secs_f64())
             .min(1.);
             interpolate(
                 &mut state,
@@ -108,7 +108,7 @@ fn interpolate(
     state: &mut State,
     players_prev: &[crate::Player],
     players_current: &[crate::Player],
-    interpolation_float: f32,
+    interpolation_float: f64,
 ) {
     let player_idx = state.player_idx.unwrap_or(players_prev.len());
     for (i, player) in players_prev.iter().enumerate() {

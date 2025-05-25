@@ -2,8 +2,8 @@ use std::ops::{Add, AddAssign, Mul, Sub};
 
 #[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Vec2 {
-    pub x: f32,
-    pub y: f32,
+    pub x: f64,
+    pub y: f64,
 }
 
 impl Add for Vec2 {
@@ -33,22 +33,22 @@ impl AddAssign for Vec2 {
     }
 }
 
-impl Mul<f32> for Vec2 {
+impl Mul<f64> for Vec2 {
     type Output = Self;
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
         Vec2::new(self.x * rhs, self.y * rhs)
     }
 }
 
 impl Mul for Vec2 {
-    type Output = f32;
+    type Output = f64;
     fn mul(self, rhs: Self) -> Self::Output {
         self.x * rhs.x + self.y * rhs.y
     }
 }
 
 impl Vec2 {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: f64, y: f64) -> Self {
         Vec2 { x, y }
     }
 
@@ -61,11 +61,11 @@ impl Vec2 {
         }
     }
 
-    pub fn len(self) -> f32 {
+    pub fn len(self) -> f64 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
 
-    pub fn dist(self, rhs: Vec2) -> f32 {
+    pub fn dist(self, rhs: Vec2) -> f64 {
         (self - rhs).len()
     }
 }

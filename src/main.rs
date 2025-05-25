@@ -17,14 +17,14 @@ mod sys;
 
 const LOGICAL_WIDTH: u32 = 320;
 const LOGICAL_HEIGHT: u32 = 240;
-const WIDTH: f32 = LOGICAL_WIDTH as _;
-const HEIGHT: f32 = LOGICAL_HEIGHT as _;
-const HALF_WIDTH: f32 = WIDTH / 2.;
-const HALF_HEIGHT: f32 = HEIGHT / 2.;
+const WIDTH: f64 = LOGICAL_WIDTH as _;
+const HEIGHT: f64 = LOGICAL_HEIGHT as _;
+const HALF_WIDTH: f64 = WIDTH / 2.;
+const HALF_HEIGHT: f64 = HEIGHT / 2.;
 
-const PLAYER_TOP_SPEED: f32 = 100.;
-const PLAYER_ACCELERATION: f32 = PLAYER_TOP_SPEED * 10.;
-const JUMP_SPEED: f32 = 100.;
+const PLAYER_TOP_SPEED: f64 = 100.;
+const PLAYER_ACCELERATION: f64 = PLAYER_TOP_SPEED * 10.;
+const JUMP_SPEED: f64 = 100.;
 const GRAVITY: Vec2 = Vec2 {
     x: 0.,
     y: 9.81 * 20.,
@@ -134,7 +134,7 @@ impl Game {
         }
     }
 
-    fn simple_player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
+    fn simple_player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f64) {
         let player = &mut self.players[player_idx];
         let target_velocity =
             Vec2::new(movement.0 as _, movement.1 as _).normalize() * PLAYER_TOP_SPEED;
@@ -143,10 +143,10 @@ impl Game {
         collide(player, &self.platforms);
     }
 
-    fn player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f32) {
+    fn player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f64) {
         let player = &mut self.players[player_idx];
         let current_velocity = player.velocity.x;
-        let target_velocity = movement.0 as f32 * PLAYER_TOP_SPEED;
+        let target_velocity = movement.0 as f64 * PLAYER_TOP_SPEED;
         let velocity_diff = target_velocity - current_velocity;
 
         let acc = match player.state {
@@ -154,7 +154,7 @@ impl Game {
                 let direction = if velocity_diff < 0. { -1. } else { 1. };
                 PLAYER_ACCELERATION * direction * dt / 3.
             }
-            _ => PLAYER_ACCELERATION * movement.0 as f32 * dt,
+            _ => PLAYER_ACCELERATION * movement.0 as f64 * dt,
         };
 
         let delta_v = if acc.abs() < velocity_diff.abs() {
@@ -172,7 +172,7 @@ impl Game {
                 }
                 PlayerState::WallBound(direction) => {
                     player.velocity.y = -JUMP_SPEED;
-                    player.velocity.x -= direction as f32 * JUMP_SPEED * 1.5;
+                    player.velocity.x -= direction as f64 * JUMP_SPEED * 1.5;
                 }
                 PlayerState::Airborne => (),
             }
@@ -187,7 +187,7 @@ impl Game {
 
 #[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Platform {
-    size: (f32, f32),
+    size: (f64, f64),
     pos: Vec2,
 }
 
@@ -195,7 +195,7 @@ struct Platform {
 struct Player {
     pos: Vec2,
     velocity: Vec2,
-    size: f32,
+    size: f64,
     state: PlayerState,
 }
 
