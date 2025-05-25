@@ -4,7 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use sdl2::{EventPump, keyboard::Keycode, pixels::Color, rect::Rect};
+use sdl2::{EventPump, keyboard::Keycode};
 
 use crate::{Game, ServerResponse, networking, render, server, sys};
 
@@ -95,7 +95,7 @@ pub fn run(
         }
 
         render::game(&state.shared, &mut sdl.canvas);
-        render_settings(font, &settings, &mut sdl);
+        render::settings(&mut sdl, font, settings.to_string().lines());
         sdl.canvas.present();
 
         tick.wait();
@@ -128,22 +128,6 @@ fn reconcile(state: &mut State, movement_history: &Vec<((i8, i8), usize)>) {
                 .shared
                 .player_physics(player_idx, movement.0, DELTA_TIME);
         }
-    }
-}
-
-fn render_settings(font: &sdl2::ttf::Font, settings: &Settings, sdl: &mut sys::SdlContext) {
-    for (i, text_chunk) in settings.to_string().lines().enumerate() {
-        let surface = font.render(text_chunk).blended(Color::BLACK).unwrap();
-
-        let texture = sdl
-            .texture_creator
-            .create_texture_from_surface(&surface)
-            .unwrap();
-
-        let sdl2::render::TextureQuery { width, height, .. } = texture.query();
-
-        let target = Rect::new(20, 4 + (height * i as u32) as i32, width, height);
-        sdl.canvas.copy(&texture, None, Some(target)).unwrap();
     }
 }
 
