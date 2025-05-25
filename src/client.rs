@@ -22,9 +22,9 @@ pub fn run(
     };
 
     let mut settings = Settings {
-        reconciliation: true,
-        interpolation: true,
-        prediction: true,
+        reconciliation: false,
+        interpolation: false,
+        prediction: false,
         ping_ms: 250,
     };
 
