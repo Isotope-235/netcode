@@ -69,7 +69,7 @@ impl Client {
         self.ping_ms.store(ms, Ordering::Relaxed);
     }
 
-    pub fn recv(&self) -> mpsc::TryIter<Box<[u8]>> {
+    pub fn recv(&self) -> impl Iterator<Item = Box<[u8]>> {
         self.receiver.try_iter()
     }
 
