@@ -1,6 +1,6 @@
 use std::{error::Error, io, net::UdpSocket, time::Duration};
 
-use sdl2::EventPump;
+use sdl2::{EventPump, pixels::Color, rect::Rect};
 
 use crate::{Game, ServerResponse, render, sys};
 
@@ -11,7 +11,11 @@ const DEFAULT_TICKRATE: usize = 4;
 const FRAME_TIME: Duration = Duration::from_millis(200);
 const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
-pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>> {
+pub fn run(
+    mut sdl: sys::SdlContext,
+    font: &sdl2::ttf::Font,
+    shared: Game,
+) -> Result<(), Box<dyn Error>> {
     let mut state = State {
         last_acc: Vec::new(),
         clients: Vec::new(),
@@ -67,6 +71,7 @@ pub fn run(mut sdl: sys::SdlContext, shared: Game) -> Result<(), Box<dyn Error>>
 
         broadcast(&state, &server)?;
         render(&state.shared, &mut sdl.canvas);
+        render_settings(font, tickrate, &mut sdl);
         sdl.canvas.present();
 
         tick.wait();
@@ -120,4 +125,18 @@ fn handle_server_inputs(events: &mut EventPump, running: &mut bool, tickrate: &m
             _ => (),
         }
     }
+}
+
+fn render_settings(font: &sdl2::ttf::Font, tickrate: usize, sdl: &mut sys::SdlContext) {
+    let text = format!("Server ticks per second: {}", tickrate);
+    let surface = font.render(&text).blended(Color::BLACK).unwrap();
+    let texture = sdl
+        .texture_creator
+        .create_texture_from_surface(&surface)
+        .unwrap();
+
+    let sdl2::render::TextureQuery { width, height, .. } = texture.query();
+
+    let target = Rect::new(20, 4, width, height);
+    sdl.canvas.copy(&texture, None, Some(target)).unwrap();
 }

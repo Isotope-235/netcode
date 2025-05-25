@@ -56,8 +56,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     #[allow(clippy::wildcard_in_or_patterns)]
     match &mode[..] {
-        "server" | "--server" => server::run(ctx, shared_state),
-        "client" | "--client" | _ => client::run(ctx, font, shared_state),
+        "server" | "--server" => server::run(ctx, &font, shared_state),
+        "client" | "--client" | _ => client::run(ctx, &font, shared_state),
     }
 }
 

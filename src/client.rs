@@ -13,7 +13,7 @@ pub const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
 pub fn run(
     mut sdl: sys::SdlContext,
-    font: sdl2::ttf::Font,
+    font: &sdl2::ttf::Font,
     shared: Game,
 ) -> Result<(), Box<dyn Error>> {
     let mut state = State {
@@ -95,7 +95,7 @@ pub fn run(
         }
 
         render(&state.shared, &mut sdl.canvas);
-        render_settings(&font, &settings, &mut sdl);
+        render_settings(font, &settings, &mut sdl);
         sdl.canvas.present();
 
         tick.wait();
