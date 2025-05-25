@@ -39,7 +39,6 @@ fn load_delay(ms: &AtomicU64) -> Duration {
 pub struct Client {
     ping_ms: Arc<AtomicU64>,
     socket: net::UdpSocket,
-    sending_thread: thread::JoinHandle<()>,
     receiver: mpsc::Receiver<Box<[u8]>>,
 }
 
@@ -57,12 +56,11 @@ impl Client {
         let ping_ms = Arc::new(AtomicU64::new(simulated_ping_ms));
         let socket_ref = socket.try_clone()?;
 
-        let sending_thread = spawn_sender(socket_ref, tx, Arc::clone(&ping_ms));
+        spawn_sender(socket_ref, tx, Arc::clone(&ping_ms));
 
         Ok(Self {
             ping_ms,
             socket,
-            sending_thread,
             receiver,
         })
     }
