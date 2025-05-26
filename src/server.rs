@@ -16,7 +16,7 @@ pub fn run(
     shared: Game,
 ) -> Result<(), Box<dyn Error>> {
     let mut state = State {
-        last_acc: Vec::new(),
+        last_ack: Vec::new(),
         clients: Vec::new(),
         shared,
     };
@@ -47,14 +47,14 @@ pub fn run(
 
             if player_idx >= state.clients.len() {
                 state.clients.push(origin);
-                state.last_acc.push(0);
+                state.last_ack.push(0);
                 state.shared.players.push(Player::new());
             }
 
             let message: Message = serde_json::from_slice(&buf[..read]).unwrap();
             let movement = (message.x, message.y);
 
-            state.last_acc[player_idx] = message.id;
+            state.last_ack[player_idx] = message.id;
             state
                 .shared
                 .player_physics(player_idx, movement, crate::client::DELTA_TIME);
@@ -73,14 +73,14 @@ pub fn run(
 }
 
 struct State {
-    last_acc: Vec<usize>,
+    last_ack: Vec<usize>,
     clients: Vec<std::net::SocketAddr>,
     shared: Game,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct AckMessage {
-    last_acc: usize,
+    last_ack: usize,
     game: Game,
 }
 
@@ -89,7 +89,7 @@ fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     for (i, addr) in state.clients.iter().enumerate() {
         let response = ServerResponse {
             game: state.shared.clone(),
-            ack_id: state.last_acc[i],
+            ack_id: state.last_ack[i],
             player_idx: i,
         };
         let serialized_state = serde_json::to_vec(&response).unwrap();
