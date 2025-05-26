@@ -47,7 +47,7 @@ For å kjøre serveren brukes:
 «+» — Øk tick rate  
 «-» — Senk tick rate
 
-For å kjøre en klient brukes;
+For å kjøre en klient brukes:
 `cargo run --release`
 
 ### Bevegelse
