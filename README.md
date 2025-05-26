@@ -8,9 +8,9 @@ Denne frivillige oppgaven ble gitt i Nettverksprogramming IDATT2104 i 2025 vår 
 
 ## Implementert funksjonalitet
 - Nettverksfunksjonalitet
-	- Kommunikasjon via UDP. serde og serde_json blir brukt for serialisering og deserialisering av klient-server kommunikasjon.
+	- Kommunikasjon via UDP. `serde` og `serde_json` blir brukt for serialisering og deserialisering av klient-server kommunikasjon.
 - Spillserver
-	- En server med justerbar tick rate. Støtter opp til 6 spillere, bare begrensa av antall forhåndsdefinerte farger en spiller kan ha. Dette kan utvides i PLAYER_COLORS arrayet.
+	- En server med justerbar tick rate. Støtter opp til 6 spillere, bare begrensa av antall forhåndsdefinerte farger en spiller kan ha. Dette kan utvides i `PLAYER_COLORS`-konstantet som ligger i `render.rs`.
 - Spillklient
 	- Prediction 
 		- Spillers posisjon og fart forutsees på klientsiden med server som endelig autoritet.
@@ -25,44 +25,43 @@ Denne frivillige oppgaven ble gitt i Nettverksprogramming IDATT2104 i 2025 vår 
 	- Hopping og vegg-hopping er implementert.
 
 ## Mangler/Fremtidig arbeid
-- Server sin tick rate bestemmer bare hvor ofte spill-state sendes ut, men spiller-logikk og fysikk bestemmes bare av hvor mange udp-pakker som sendes fra klienten til serveren. Dette gjør det mulig å speed-hacke om man senker sin egen DELTA_TIME før man kompilerer prosjektet.
+- Server sin tick rate bestemmer bare hvor ofte spill-state sendes ut, men spiller-logikk og fysikk bestemmes bare av hvor mange udp-pakker som sendes fra klienten til serveren. Dette gjør det mulig å speed-hacke om man senker verdien av egen `DELTA_TIME` før man kompilerer prosjektet.
 - Kunne implementert luftmotstand og gameplay for å gjøre demoen litt mer interessant. En bivirkning av mangelen på luftmotstand er at man kan super-hoppe fra en vegg til en annen om man bytter retning akkurat når man treffer veggen og hopper. Dette er også en litt kjekk feature så den trenger ikke nødvendigvis å fjernes.
-- Om en spiller har koblet til, fjernes aldri den spilleren fra spillet selv om den lukker vinduet sitt og slutter å sende UDP pakker.
+- Om en spiller har koblet til, fjernes aldri den spilleren fra spillet selv om den lukker vinduet sitt og slutter å sende UDP-pakker.
 
 ## Eksterne avhengigheter
-SDL2 - Lavnivå C GUI bibliotek for å vise spillet og ta spiller-input.
-serde - Bibliotek for å serialisere og deserialisere rust structs til et felles format som server og klient kan bruke.
-serde_json - Det spesifikke formatet som serde-serialiserte dataen blir omgjort til og fra.
+`SDL2` - Lavnivå C grafikkbibliotek for å vise spillet og ta spiller-input.
+`serde` - Bibliotek for å serialisere og deserialisere Rust-datastrukturer til et felles format som server og klient kan bruke.
+`serde_json` - Implementerer det spesifikke formatet som `serde`-serialiserte dataen blir omgjort til og fra.
 
 ## Installasjonsinstruksjoner
-For å klone repoet kjøres;
+For å klone repoet kjøres:
 `git clone https://github.com/Isotope-235/netcode.git`
 
-IP og port til serveren kan konfigureres i `src/server.rs`
+IP og port til serveren kan konfigureres med konstantene `HOST` og `PORT` i `src/server.rs`
 ## Instruksjoner for å bruke løsningen
-For å kjøre serveren brukes;
+For å kjøre serveren brukes:
 `cargo run --release -- server`
 
 ### Server kontroller
-"+" - Øk tick rate  
-"-" - Senk tick rate
+«+» — Øk tick rate  
+«-» — Senk tick rate
 
 For å kjøre en klient brukes;
 `cargo run --release`
 
-### Klient kontroller
-#### Bevegelse
-"W" - Hopp  
-"A" - Venstre  
-"D" - Høyre
+### Bevegelse
+«W» — Hopp  
+«A» — Venstre  
+«D» — Høyre
 
-#### Netcode features
-"P" - Prediction (toggle)  
-"R" - Reconciliation (toggle)  
-"I" - Interpolation (toggle)  
-"+" - Øk ping  
-"-" - Senk ping
+### Netcode features (toggle)
+«P» — Prediction (toggle)  
+«R» — Reconciliation (toggle)  
+«I» — Interpolation (toggle)  
+«+» — Øk simulert ping  
+«-» — Senk simulert ping
 
 ## Tester
-En kan kjøre tester ved bruk av;
+En kan kjøre tester ved bruk av:
 `cargo test`
