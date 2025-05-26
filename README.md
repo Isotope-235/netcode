@@ -59,6 +59,8 @@ For å kjøre en klient brukes;
 "P" - Prediction
 "R" - Reconciliation
 "I" - Interpolation
+"+" - Øk ping
+"-" - Senk ping
 
 ## Tester
 En kan kjøre tester ved bruk av;
