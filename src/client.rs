@@ -28,7 +28,7 @@ pub fn run(
 
     let ticker = sys::ticker(FRAME_TIME);
 
-    let mut movement: (i8, i8) = (0, 0);
+    let mut movement = (0, 0);
 
     let mut netcode = netcode::init();
 

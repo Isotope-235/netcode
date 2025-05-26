@@ -13,7 +13,7 @@ pub fn init() -> Netcode {
 }
 
 pub struct Netcode {
-    movement_history: Vec<((i8, i8), usize)>,
+    movement_history: Vec<Movement>,
     players_prev: Vec<Player>,
     players_current: Vec<Player>,
     server_tick_time: Duration,
@@ -22,8 +22,8 @@ pub struct Netcode {
 
 impl Netcode {
     pub fn push_movement(&mut self, movement: (i8, i8)) -> usize {
-        let id = self.movement_history.last().map(|l| l.1 + 1).unwrap_or(1);
-        self.movement_history.push((movement, id));
+        let id = self.movement_history.last().map(|l| l.id + 1).unwrap_or(1);
+        self.movement_history.push(Movement { id, dir: movement });
         id
     }
 
@@ -44,7 +44,7 @@ impl Netcode {
         interpolation: bool,
     ) {
         if move_ack_id != 0 {
-            self.movement_history.retain(|m| m.1 > move_ack_id);
+            self.movement_history.retain(|m| m.id > move_ack_id);
             if reconciliation {
                 reconcile(state, &self.movement_history)
             };
@@ -71,12 +71,12 @@ fn predict(state: &mut client::State, movement: (i8, i8)) {
     }
 }
 
-fn reconcile(state: &mut client::State, movement_history: &[((i8, i8), usize)]) {
+fn reconcile(state: &mut client::State, movement_history: &[Movement]) {
     for movement in movement_history {
         if let Some(player_idx) = state.player_idx {
             state
                 .shared
-                .player_physics(player_idx, movement.0, client::DELTA_TIME);
+                .player_physics(player_idx, movement.dir, client::DELTA_TIME);
         }
     }
 }

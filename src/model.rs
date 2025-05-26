@@ -15,6 +15,11 @@ const GRAVITY: Vec2 = Vec2 {
     y: 9.81 * 20.,
 };
 
+pub struct Movement {
+    pub id: usize,
+    pub dir: (i8, i8),
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Message {
     pub id: usize,
