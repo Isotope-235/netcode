@@ -40,7 +40,7 @@ For å klone repoet kjøres:
 
 IP og port til serveren kan konfigureres med konstantene `HOST` og `PORT` i `src/server.rs`
 
-For å bygge binærfilen bruker man `cargo build --release`. Merk at når programmet kjøres må `assets`-mappen og SDL2-dll og -lib-filene ligge ved siden av binærfilen.
+For å bygge binærfilen bruker man `cargo build --release`. Merk at når programmet kjøres må `assets`-mappen og ALLE SDL2-dll og -lib-filene ligge ved siden av binærfilen.
 
 ## Instruksjoner for å bruke løsningen
 For å kjøre serveren brukes:
