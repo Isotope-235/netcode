@@ -47,23 +47,23 @@ For å kjøre serveren brukes:
 `cargo run --release -- server`
 
 ### Server kontroller
-«+» — Øk tick rate  
-«-» — Senk tick rate
+`+` — Øk tick rate  
+`-` — Senk tick rate
 
 For å kjøre en klient brukes:
 `cargo run --release`
 
 ### Bevegelse
-«W» — Hopp  
-«A» — Venstre  
-«D» — Høyre
+`W` — Hopp  
+`A` — Venstre  
+`D` — Høyre
 
 ### Netcode features (toggle)
-«P» — Prediction (toggle)  
-«R» — Reconciliation (toggle)  
-«I» — Interpolation (toggle)  
-«+» — Øk simulert ping  
-«-» — Senk simulert ping
+`P` — Prediction (toggle)  
+`R` — Reconciliation (toggle)  
+`I` — Interpolation (toggle)  
+`+` — Øk simulert ping  
+`-` — Senk simulert ping
 
 ## Tester
 En kan kjøre tester ved bruk av:
