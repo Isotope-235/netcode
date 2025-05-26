@@ -78,13 +78,17 @@ impl Game {
         let acc = match player.state {
             PlayerState::Grounded => {
                 let direction = if velocity_diff < 0. { -1. } else { 1. };
-                PLAYER_ACCELERATION * direction * dt / 3.
+                PLAYER_ACCELERATION * direction * dt
             }
             _ => PLAYER_ACCELERATION * movement.0 as f64 * dt,
         };
 
         let delta_v = if acc.abs() < velocity_diff.abs() {
-            acc
+            if acc * velocity_diff < 0. {
+                - acc
+            } else {
+                acc
+            }
         } else {
             velocity_diff
         };
