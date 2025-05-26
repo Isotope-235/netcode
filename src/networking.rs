@@ -23,7 +23,7 @@ fn spawn_sender(
                 thread::spawn(move || {
                     thread::sleep(delay);
                     let boxed = Box::from(&buf[..read]);
-                    tx_ref.send(boxed).unwrap();
+                    let _ = tx_ref.send(boxed);
                 });
             }
             // if server is not running, busy wait
