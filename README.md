@@ -51,19 +51,19 @@ For å kjøre binærfilen som server, bruk `./<filnavn> --server`. For å kjøre
 For å kjøre serveren brukes:
 `cargo run --release -- server`
 
+For å kjøre en klient brukes:
+`cargo run --release`
+
 ### Server kontroller
 `+` — Øk tick rate  
 `-` — Senk tick rate
 
-For å kjøre en klient brukes:
-`cargo run --release`
-
-### Bevegelse
+### Bevegelse (bare client)
 `W` — Hopp  
 `A` — Venstre  
 `D` — Høyre
 
-### Netcode features (toggle)
+### Netcode features (bare client)
 `P` — Prediction (toggle)  
 `R` — Reconciliation (toggle)  
 `I` — Interpolation (toggle)  
@@ -73,3 +73,6 @@ For å kjøre en klient brukes:
 ## Tester
 En kan kjøre tester ved bruk av:
 `cargo test`
+
+Tester for en gitt implementasjon ligger i samme fil som implementasjonen.
+For eksempel ligger testene for `Vec2`, en implementasjon av 2-dimensjonale vektorer, i `math.rs`, samme fil som `Vec2` ligger i.
