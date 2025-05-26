@@ -179,3 +179,44 @@ impl Display for Settings {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ping_increment() {
+        let mut settings = Settings {
+            reconciliation: false,
+            prediction: false,
+            interpolation: false,
+            ping_ms: 250,
+        };
+        settings.increment_ping();
+        assert_eq!(settings.ping_ms, 300);
+    }
+
+    #[test]
+    fn ping_decrement() {
+        let mut settings = Settings {
+            reconciliation: false,
+            prediction: false,
+            interpolation: false,
+            ping_ms: 250,
+        };
+        settings.decrement_ping();
+        assert_eq!(settings.ping_ms, 200);
+    }
+
+    #[test]
+    fn ping_decrement_zero() {
+        let mut settings = Settings {
+            reconciliation: false,
+            prediction: false,
+            interpolation: false,
+            ping_ms: 0,
+        };
+        settings.decrement_ping();
+        assert_eq!(settings.ping_ms, 0);
+    }
+}

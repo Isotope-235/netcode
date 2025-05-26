@@ -126,3 +126,53 @@ impl Server {
         self.socket.send_to(data, addr).map(drop)
     }
 }
+
+#[cfg(test)]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn recv_from_server(server: &mut Server) -> io::Result<Box<[u8]>> {
+        loop {
+            match server.recv() {
+                Ok((data, _)) => return Ok(data.into()),
+                Err(e) if e.kind() == io::ErrorKind::WouldBlock => continue,
+                Err(e) => return Err(e),
+            }
+        }
+    }
+
+    #[test]
+    fn test_client_server_communication() {
+        let mut server = Server::bind(net::Ipv4Addr::LOCALHOST, 8080).unwrap();
+        let client = Client::connect((net::Ipv4Addr::LOCALHOST, 8080), 100).unwrap();
+
+        let msg = b"very important test data";
+
+        let start = std::time::Instant::now();
+        client.send(&msg).unwrap();
+
+        let received_by_server = recv_from_server(&mut server).unwrap();
+        let elapsed = start.elapsed();
+
+        let received: Box<[u8]> = serde_json::from_slice(&received_by_server).unwrap();
+
+        assert_eq!(&received[..], &msg[..]);
+        assert!(
+            elapsed.as_millis() >= 50,
+            "Expected at least 50ms delay, got {:?}",
+            elapsed
+        );
+    }
+
+    #[test]
+    fn test_client_set_ping() {
+        let client = Client::connect((net::Ipv4Addr::LOCALHOST, 8080), 100).unwrap();
+
+        client.set_ping(200);
+        assert_eq!(client.ping_ms.load(Ordering::Relaxed), 200);
+
+        client.set_ping(50);
+        assert_eq!(client.ping_ms.load(Ordering::Relaxed), 50);
+    }
+}

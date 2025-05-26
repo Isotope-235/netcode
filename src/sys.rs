@@ -87,3 +87,17 @@ impl Tick {
         std::thread::sleep(wait.unwrap_or_default());
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ticker_waits() {
+        let ticker = ticker(Duration::from_millis(100));
+        let tick = ticker.start();
+        let start = tick.start;
+        tick.wait();
+        assert!(start.elapsed() >= Duration::from_millis(100));
+    }
+}
