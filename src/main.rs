@@ -3,6 +3,7 @@ use std::error::Error;
 mod client;
 mod math;
 mod model;
+mod netcode;
 mod networking;
 mod render;
 mod server;
