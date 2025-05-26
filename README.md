@@ -75,4 +75,4 @@ En kan kjøre tester ved bruk av:
 `cargo test`
 
 Tester for en gitt implementasjon ligger i samme fil som implementasjonen.
-For eksempel ligger testene for `Vec2`, en implementasjon av 2-dimensjonale vektorer, i `math.rs`, samme fil som `Vec2` ligger i.
+For eksempel ligger testene for `Vec2`-typen i `math.rs`, samme fil som `Vec2` ligger i.
