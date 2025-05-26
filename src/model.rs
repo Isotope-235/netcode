@@ -108,6 +108,13 @@ pub struct Platform {
     pub pos: Vec2,
 }
 
+impl Platform {
+    fn bounds(&self) -> (Vec2, Vec2) {
+        let dims = Vec2::new(self.size.0 * 0.50, self.size.1 * 0.50);
+        (self.pos - dims, self.pos + dims)
+    }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct Player {
     pub pos: Vec2,
@@ -130,20 +137,13 @@ impl Player {
     }
 
     fn radius(&self) -> f64 {
-        self.size * 0.5
+        self.size * 0.50
     }
 
-    fn dimensions(&self) -> Vec2 {
+    fn bounds(&self) -> (Vec2, Vec2) {
         let rad = self.radius();
-        Vec2::new(rad, rad)
-    }
-
-    fn top_left(&self) -> Vec2 {
-        self.pos - self.dimensions()
-    }
-
-    fn bottom_right(&self) -> Vec2 {
-        self.pos + self.dimensions()
+        let dims = Vec2::new(rad, rad);
+        (self.pos - dims, self.pos + dims)
     }
 }
 
@@ -161,12 +161,13 @@ fn collide(player: &mut Player, platforms: &[Platform]) {
     while collided {
         collided = false;
         for platform in platforms {
-            let (topleft, botright) = (player.top_left(), player.bottom_right());
+            let (topleft, botright) = player.bounds();
+            let (platform_topleft, platform_botright) = platform.bounds();
 
-            if platform.pos.x + platform.size.0 / 2. > topleft.x
-                && platform.pos.x - platform.size.0 / 2. < botright.x
-                && platform.pos.y + platform.size.1 / 2. > topleft.y
-                && platform.pos.y - platform.size.1 / 2. < botright.y
+            if platform_botright.x > topleft.x
+                && platform_topleft.x < botright.x
+                && platform_botright.y > topleft.y
+                && platform_topleft.y < botright.y
             {
                 collided = true;
                 fix_position(player, platform);
