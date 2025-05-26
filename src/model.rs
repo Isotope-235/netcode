@@ -129,8 +129,12 @@ impl Player {
         }
     }
 
+    fn radius(&self) -> f64 {
+        self.size * 0.5
+    }
+
     fn dimensions(&self) -> Vec2 {
-        let rad = self.size * 0.5;
+        let rad = self.radius();
         Vec2::new(rad, rad)
     }
 
@@ -175,26 +179,20 @@ fn collide(player: &mut Player, platforms: &[Platform]) {
 fn fix_position(player: &mut Player, platform: &Platform) {
     let player_relative_position = player.pos - platform.pos;
 
+    let rad = player.radius();
+
     // These corrected positions are the possible positions to push the
     // player out of the platform they are currently colliding with
-    let x_direction = if player_relative_position.x < 0. {
-        -1.
-    } else {
-        1.
-    };
+    let x_direction = player_relative_position.x.signum();
     let x_corrected = Vec2::new(
-        platform.pos.x + x_direction * (platform.size.0 / 2. + (player.size / 2.)),
+        platform.pos.x + x_direction * (platform.size.0 / 2. + rad),
         platform.pos.y + player_relative_position.y,
     );
 
-    let y_direction = if player_relative_position.y < 0. {
-        -1.
-    } else {
-        1.
-    };
+    let y_direction = player_relative_position.y.signum();
     let y_corrected = Vec2::new(
         platform.pos.x + player_relative_position.x,
-        platform.pos.y + y_direction * (platform.size.1 / 2. + (player.size / 2.)),
+        platform.pos.y + y_direction * (platform.size.1 / 2. + rad),
     );
 
     // Check which position is closest to the players actual location and use that one
