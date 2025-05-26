@@ -91,8 +91,8 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn bind(host: std::net::Ipv4Addr, port: u16) -> io::Result<Self> {
-        let socket = std::net::UdpSocket::bind((host, port))?;
+    pub fn bind(host: net::Ipv4Addr, port: u16) -> io::Result<Self> {
+        let socket = net::UdpSocket::bind((host, port))?;
         socket.set_nonblocking(true)?;
 
         let buf = std::iter::repeat_n(0, u16::MAX as _).collect();
@@ -100,7 +100,7 @@ impl Server {
         Ok(Self { socket, buf })
     }
 
-    pub fn recv(&mut self) -> io::Result<(&[u8], std::net::SocketAddr)> {
+    pub fn recv(&mut self) -> io::Result<(&[u8], net::SocketAddr)> {
         let (read, origin) = self.socket.recv_from(&mut self.buf)?;
         Ok((&self.buf[..read], origin))
     }
