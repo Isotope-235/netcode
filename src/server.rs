@@ -78,12 +78,6 @@ struct State {
     shared: Game,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-struct AckMessage {
-    last_ack: usize,
-    game: Game,
-}
-
 #[allow(dead_code)]
 fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
     for (i, addr) in state.clients.iter().enumerate() {
