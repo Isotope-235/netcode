@@ -147,11 +147,11 @@ struct Settings {
 impl Settings {
     const PING_INTERVAL: u64 = 50;
 
-    pub fn increment_ping(&mut self) {
+    fn increment_ping(&mut self) {
         self.ping_ms += Self::PING_INTERVAL;
     }
 
-    pub fn decrement_ping(&mut self) {
+    fn decrement_ping(&mut self) {
         self.ping_ms -= Self::PING_INTERVAL.min(self.ping_ms);
     }
 }

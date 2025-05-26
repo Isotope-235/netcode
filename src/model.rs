@@ -1,7 +1,7 @@
 use crate::math::Vec2;
 
-pub const LOGICAL_WIDTH: u32 = 320;
-pub const LOGICAL_HEIGHT: u32 = 240;
+const LOGICAL_WIDTH: u32 = 320;
+const LOGICAL_HEIGHT: u32 = 240;
 const WIDTH: f64 = LOGICAL_WIDTH as _;
 const HEIGHT: f64 = LOGICAL_HEIGHT as _;
 const HALF_WIDTH: f64 = WIDTH / 2.;
@@ -84,11 +84,7 @@ impl Game {
         };
 
         let delta_v = if acc.abs() < velocity_diff.abs() {
-            if acc * velocity_diff < 0. {
-                - acc
-            } else {
-                acc
-            }
+            (acc * velocity_diff).signum() * acc
         } else {
             velocity_diff
         };
