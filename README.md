@@ -30,8 +30,8 @@ Denne frivillige oppgaven ble gitt i Nettverksprogramming IDATT2104 i 2025 vår 
 - Om en spiller har koblet til, fjernes aldri den spilleren fra spillet selv om den lukker vinduet sitt og slutter å sende UDP-pakker.
 
 ## Eksterne avhengigheter
-`SDL2` - Lavnivå C grafikkbibliotek for å vise spillet og ta spiller-input.
-`serde` - Bibliotek for å serialisere og deserialisere Rust-datastrukturer til et felles format som server og klient kan bruke.
+SDL2 - Lavnivå C grafikkbibliotek for å vise spillet og ta spiller-input.  
+`serde` - Bibliotek for å serialisere og deserialisere Rust-datastrukturer til et felles format som server og klient kan bruke.  
 `serde_json` - Implementerer det spesifikke formatet som `serde`-serialiserte dataen blir omgjort til og fra.
 
 ## Installasjonsinstruksjoner
