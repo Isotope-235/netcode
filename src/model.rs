@@ -46,6 +46,10 @@ impl Game {
                 },
                 Platform {
                     size: (WIDTH, 30.),
+                    pos: Vec2::new(HALF_WIDTH, -15.),
+                },
+                Platform {
+                    size: (WIDTH, 30.),
                     pos: Vec2::new(HALF_WIDTH, HEIGHT),
                 },
                 Platform {
