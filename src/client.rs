@@ -1,3 +1,5 @@
+//! The client game loop.
+
 use std::{error::Error, fmt::Display, time::Duration};
 
 use sdl2::{EventPump, keyboard::Keycode};
@@ -5,8 +7,11 @@ use sdl2::{EventPump, keyboard::Keycode};
 use crate::{model::*, netcode, networking, render, server, sys};
 
 const FRAME_TIME: Duration = Duration::from_nanos(16_666_666);
+
+/// Client-observed time delta.
 pub const DELTA_TIME: f64 = FRAME_TIME.as_secs_f64();
 
+/// Run the client.
 pub fn run(
     mut sdl: sys::SdlContext,
     font: &sdl2::ttf::Font,
@@ -131,8 +136,14 @@ fn handle_client_inputs(
     }
 }
 
+/// Client-observed game state.
+///
+/// Keeps track of which player the client is, and contains their local version of the game state.
 pub struct State {
+    /// The index of the local player.
+    /// Used to index the player array in the shared game state.
     pub player_idx: Option<usize>,
+    /// Shared game state, i.e. a struct shared by the client and the server, representing the whole game.
     pub shared: Game,
 }
 

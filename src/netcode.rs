@@ -1,7 +1,10 @@
+//! Implementations of netcode features.
+
 use std::time::{Duration, Instant};
 
 use crate::{client, model::*};
 
+/// Initialize the `Netcode`, which implements netcode features.
 pub fn init() -> Netcode {
     Netcode {
         movement_history: Vec::new(),
@@ -12,6 +15,10 @@ pub fn init() -> Netcode {
     }
 }
 
+/// Keeps track of state required to implement netcode features.
+///
+/// Use `apply` to apply prediction, reconciliation and interpolation.
+/// Use `push_movement` and `update` to update the state each frame.
 pub struct Netcode {
     movement_history: Vec<Movement>,
     players_prev: Vec<Player>,
@@ -21,12 +28,16 @@ pub struct Netcode {
 }
 
 impl Netcode {
+    /// Adds another movement to the movement history, which is needed for reconciliation.
+    ///
+    /// Returns the ID/sequence number of the movement, used for acknowledgment.
     pub fn push_movement(&mut self, movement: (i8, i8)) -> usize {
         let id = self.movement_history.last().map(|l| l.id + 1).unwrap_or(1);
         self.movement_history.push(Movement { id, dir: movement });
         id
     }
 
+    /// Update the current player state, which is used for interpolation.
     pub fn update(&mut self, players_current: Vec<Player>) {
         std::mem::swap(&mut self.players_prev, &mut self.players_current);
         self.server_tick_time = self.server_timestamp.elapsed();
@@ -34,6 +45,9 @@ impl Netcode {
         self.players_current = players_current;
     }
 
+    /// Apply netcode features on the client side. Use the boolean arguments to specify which features to enable.
+    ///
+    /// `move_ack_id` is the id of the last movement acknowledged by the server.
     pub fn apply(
         &mut self,
         state: &mut client::State,

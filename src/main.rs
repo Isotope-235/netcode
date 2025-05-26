@@ -1,3 +1,10 @@
+//! A small game-like multi-player demonstration for netcode features.
+//!
+//! The demo implements three of the most common netcode features:
+//! — prediction
+//! — reconcilitation
+//! — interpolation
+
 use std::error::Error;
 
 mod client;

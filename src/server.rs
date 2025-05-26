@@ -1,3 +1,5 @@
+//! The server's game loop.
+
 use std::{error::Error, io, time::Duration};
 
 use sdl2::EventPump;
@@ -10,6 +12,7 @@ pub const PORT: u16 = 7878;
 const DEFAULT_TICKRATE: usize = 4;
 const FRAME_TIME: Duration = Duration::from_millis(200);
 
+/// Run the server.
 pub fn run(
     mut sdl: sys::SdlContext,
     font: &sdl2::ttf::Font,

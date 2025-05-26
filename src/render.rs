@@ -1,3 +1,5 @@
+//! Shared utilities for rendering the game through SDL2
+
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
@@ -21,6 +23,7 @@ fn centered_rect(pos: Vec2, size: (f64, f64)) -> Rect {
     Rect::from_center(Point::new(pos.x as _, pos.y as _), size.0 as _, size.1 as _)
 }
 
+/// Render the current game state.
 pub fn game(game: &Game, canvas: &mut sdl2::render::WindowCanvas) {
     canvas.set_draw_color(BG);
     canvas.clear();
@@ -40,6 +43,10 @@ pub fn game(game: &Game, canvas: &mut sdl2::render::WindowCanvas) {
     }
 }
 
+/// Render settings.
+///
+/// Each setting is one line from the iterator.
+/// Each setting will get its own line, with appropriate spacing between the settings.
 pub fn settings<'a, L: IntoIterator<Item = &'a str>>(
     sdl: &mut sys::SdlContext,
     font: &sdl2::ttf::Font,

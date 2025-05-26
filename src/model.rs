@@ -1,3 +1,5 @@
+//! Items implementing game logic and communication between server and client.
+
 use crate::math::Vec2;
 
 const LOGICAL_WIDTH: u32 = 320;
@@ -15,32 +17,51 @@ const GRAVITY: Vec2 = Vec2 {
     y: 9.81 * 20.,
 };
 
+/// One movement input.
+///
+/// Contains an id/sequence number, which is used to implement reconciliation.
 pub struct Movement {
+    /// The sequence number.
     pub id: usize,
+    /// The directionality of the movement input.
     pub dir: (i8, i8),
 }
 
+/// A message DTO, sent from the client to the server.
+///
+/// Contains information about the client's inputs.
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Message {
+    /// The sequence number.
     pub id: usize,
+    /// The x value of the directionality of the movement input.
     pub x: i8,
+    /// The y value of the directionality of the movement input.
     pub y: i8,
 }
 
+/// A server response DTO, sent from the server to the client each tick.
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct ServerResponse {
+    /// The last client message that was acknowledged before the server sent this response.
     pub ack_id: usize,
+    /// The player ID of the client receiving the message.
     pub player_idx: usize,
+    /// The current game state on the server, as of this response being sent.
     pub game: Game,
 }
 
+/// A game state. Includes the level layout and the current player data.
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct Game {
+    /// All platforms composing the level layout.
     pub platforms: Vec<Platform>,
+    /// The states of the players. An player ID is an index into this vector.
     pub players: Vec<Player>,
 }
 
 impl Game {
+    /// Initialize the game state, including the arrangement of the platforms.
     pub fn new() -> Self {
         Self {
             players: Vec::new(),
@@ -69,6 +90,8 @@ impl Game {
         }
     }
 
+    /// Apply physics calculations to players, using the time delta specified.
+    /// Physics are applied per new movement, even if that movement is (0, 0).
     pub fn player_physics(&mut self, player_idx: usize, movement: (i8, i8), dt: f64) {
         let player = &mut self.players[player_idx];
         let current_velocity = player.velocity.x;
@@ -111,9 +134,12 @@ impl Game {
     }
 }
 
+/// A rectangle-shaped platform, which has collision with players.
 #[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 pub struct Platform {
+    /// The (x, y) width and height.
     pub size: (f64, f64),
+    /// The position of the platform, from the middle.
     pub pos: Vec2,
 }
 
@@ -124,15 +150,23 @@ impl Platform {
     }
 }
 
+/// A player's current state, including position and velocity.
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct Player {
+    /// The current position (center) of the player.
     pub pos: Vec2,
+    /// The current velocity of the player.
     pub velocity: Vec2,
+    /// The size of the player (width and height).
     pub size: f64,
+    /// The current airtime state of the player,
+    /// which tells the physics whether to apply friction,
+    /// whether the player is allowed to jump, and whether the player can wall-jump.
     pub state: PlayerState,
 }
 
 impl Player {
+    /// Create a new player with default settings.
     pub fn new() -> Self {
         Self {
             pos: Vec2 {
@@ -156,11 +190,14 @@ impl Player {
     }
 }
 
+/// A type used to tell the physics what effect an attempt to jump will have.
 #[derive(serde::Deserialize, serde::Serialize, Clone)]
 pub enum PlayerState {
-    // Direction of hit wall
+    /// The player is on a wall. The number is the direction of the hit wall. The player can wall-jump.
     WallBound(i8),
+    /// The player is on the grounds, and is therefore allowed to jump.
     Grounded,
+    /// The player is airborne. They cannot jump.
     Airborne,
 }
 
