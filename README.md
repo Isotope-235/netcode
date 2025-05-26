@@ -26,7 +26,7 @@ Denne frivillige oppgaven ble gitt i Nettverksprogramming IDATT2104 i 2025 vår 
 
 ## Mangler/Fremtidig arbeid
 - Server sin tick rate bestemmer bare hvor ofte spill-state sendes ut, men spiller-logikk og fysikk bestemmes bare av hvor mange udp-pakker som sendes fra klienten til serveren. Dette gjør det mulig å speed-hacke om man senker verdien av egen `DELTA_TIME` før man kompilerer prosjektet.
-- Kunne implementert luftmotstand og gameplay for å gjøre demoen litt mer interessant. En bivirkning av mangelen på luftmotstand er at man kan super-hoppe fra en vegg til en annen om man bytter retning akkurat når man treffer veggen og hopper. Dette er også en litt kjekk feature så den trenger ikke nødvendigvis å fjernes.
+- Kunne implementert luftmotstand og gameplay for å gjøre demoen litt mer interessant.
 - Om en spiller har koblet til, fjernes aldri den spilleren fra spillet selv om den lukker vinduet sitt og slutter å sende UDP-pakker.
 
 ## Eksterne avhengigheter
