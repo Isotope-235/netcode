@@ -173,39 +173,39 @@ fn collide(player: &mut Player, platforms: &[Platform]) {
 }
 
 fn fix_position(player: &mut Player, platform: &Platform) {
-    let player_relative_posistion = player.pos - platform.pos;
+    let player_relative_position = player.pos - platform.pos;
 
     // These corrected positions are the possible positions to push the
     // player out of the platform they are currently colliding with
-    let x_direction = if player_relative_posistion.x < 0. {
+    let x_direction = if player_relative_position.x < 0. {
         -1.
     } else {
         1.
     };
     let x_corrected = Vec2::new(
         platform.pos.x + x_direction * (platform.size.0 / 2. + (player.size / 2.)),
-        platform.pos.y + player_relative_posistion.y,
+        platform.pos.y + player_relative_position.y,
     );
 
-    let y_direction = if player_relative_posistion.y < 0. {
+    let y_direction = if player_relative_position.y < 0. {
         -1.
     } else {
         1.
     };
     let y_corrected = Vec2::new(
-        platform.pos.x + player_relative_posistion.x,
+        platform.pos.x + player_relative_position.x,
         platform.pos.y + y_direction * (platform.size.1 / 2. + (player.size / 2.)),
     );
 
     // Check which position is closest to the players actual location and use that one
     player.pos = if player.pos.dist(y_corrected) < player.pos.dist(x_corrected) {
-        if player_relative_posistion.y < 0. {
+        if player_relative_position.y < 0. {
             player.state = PlayerState::Grounded
         }
         player.velocity.y = 0.;
         y_corrected
     } else {
-        let wall_direction = if player_relative_posistion.x < 0. {
+        let wall_direction = if player_relative_position.x < 0. {
             1
         } else {
             -1
