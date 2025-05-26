@@ -161,8 +161,7 @@ fn collide(player: &mut Player, platforms: &[Platform]) {
     while collided {
         collided = false;
         for platform in platforms {
-            let topleft = player.top_left();
-            let botright = player.bottom_right();
+            let (topleft, botright) = (player.top_left(), player.bottom_right());
 
             if platform.pos.x + platform.size.0 / 2. > topleft.x
                 && platform.pos.x - platform.size.0 / 2. < botright.x
