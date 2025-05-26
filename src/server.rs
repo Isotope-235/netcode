@@ -1,8 +1,8 @@
-use std::{error::Error, io, net::UdpSocket, time::Duration};
+use std::{error::Error, io, time::Duration};
 
 use sdl2::EventPump;
 
-use crate::{model::*, render, sys};
+use crate::{model::*, networking, render, sys};
 
 pub const HOST: std::net::Ipv4Addr = std::net::Ipv4Addr::new(127, 0, 0, 1);
 pub const PORT: u16 = 7878;
@@ -23,8 +23,7 @@ pub fn run(
 
     let mut tickrate = DEFAULT_TICKRATE;
 
-    let server = std::net::UdpSocket::bind((HOST, PORT))?;
-    server.set_nonblocking(true)?;
+    let mut server = networking::Server::bind(HOST, PORT)?;
 
     let mut ticker = sys::ticker(FRAME_TIME);
 
@@ -36,8 +35,7 @@ pub fn run(
         let frame_time = Duration::from_secs_f64((tickrate as f64).recip());
         ticker = sys::ticker(frame_time);
 
-        let mut buf = [0; 64];
-        while let Ok((read, origin)) = server.recv_from(&mut buf) {
+        while let Ok((data, origin)) = server.recv() {
             let mut player_idx = state.clients.len();
             for (i, client) in state.clients.iter().enumerate() {
                 if *client == origin {
@@ -51,7 +49,7 @@ pub fn run(
                 state.shared.players.push(Player::new());
             }
 
-            let message: Message = serde_json::from_slice(&buf[..read]).unwrap();
+            let message: Message = serde_json::from_slice(data).unwrap();
             let movement = (message.x, message.y);
 
             state.last_ack[player_idx] = message.id;
@@ -78,8 +76,7 @@ struct State {
     shared: Game,
 }
 
-#[allow(dead_code)]
-fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
+fn broadcast(state: &State, server: &networking::Server) -> io::Result<()> {
     for (i, addr) in state.clients.iter().enumerate() {
         let response = ServerResponse {
             game: state.shared.clone(),
@@ -87,7 +84,7 @@ fn broadcast(state: &State, socket: &UdpSocket) -> io::Result<()> {
             player_idx: i,
         };
         let serialized_state = serde_json::to_vec(&response).unwrap();
-        if let Err(e) = socket.send_to(&serialized_state, addr) {
+        if let Err(e) = server.send(&serialized_state, addr) {
             println!("{e}");
         };
     }

@@ -84,3 +84,28 @@ impl Client {
         Ok(())
     }
 }
+
+pub struct Server {
+    socket: net::UdpSocket,
+    buf: Box<[u8]>,
+}
+
+impl Server {
+    pub fn bind(host: std::net::Ipv4Addr, port: u16) -> io::Result<Self> {
+        let socket = std::net::UdpSocket::bind((host, port))?;
+        socket.set_nonblocking(true)?;
+
+        let buf = std::iter::repeat_n(0, u16::MAX as _).collect();
+
+        Ok(Self { socket, buf })
+    }
+
+    pub fn recv(&mut self) -> io::Result<(&[u8], std::net::SocketAddr)> {
+        let (read, origin) = self.socket.recv_from(&mut self.buf)?;
+        Ok((&self.buf[..read], origin))
+    }
+
+    pub fn send<A: net::ToSocketAddrs>(&self, data: &[u8], addr: A) -> io::Result<()> {
+        self.socket.send_to(data, addr).map(drop)
+    }
+}
